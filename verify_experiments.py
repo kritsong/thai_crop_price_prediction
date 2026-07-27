@@ -28,9 +28,10 @@ class TestForecastingPipeline(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
-        cls.workspace_root = 'd:/new_crop_data'
-        cls.results_dir = os.path.join(cls.workspace_root, 'experiments_results')
-        cls.historical_dir = os.path.join(cls.workspace_root, 'historical_data_2018')
+        from paths import DATA_DIR, EXPERIMENTS_DIR
+        cls.workspace_root = str(EXPERIMENTS_DIR.parent)
+        cls.results_dir = str(EXPERIMENTS_DIR)
+        cls.historical_dir = str(DATA_DIR)
         cls.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print(f"\n--- Starting E2E Verification Suite ---")
         print(f"Computed Device: {cls.device}")

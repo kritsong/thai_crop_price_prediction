@@ -66,8 +66,8 @@ def verify():
     image_pattern = re.compile(r'!\[.*?\]\((file:///)?(.*?)\)')
     matches = image_pattern.findall(content)
     
-    if len(matches) != 11:
-        print(f"FAILED: Expected exactly 11 embedded images in final_paper.md, but found {len(matches)}.")
+    if len(matches) != 12:
+        print(f"FAILED: Expected exactly 12 embedded images in final_paper.md, but found {len(matches)}.")
         sys.exit(1)
         
     image_failures = []
@@ -85,7 +85,7 @@ def verify():
             print(" ", f)
         sys.exit(1)
     else:
-        print("PASSED: All 11 embedded images exist at their exact paths.")
+        print("PASSED: All 12 embedded images exist at their exact paths.")
         sys.exit(0)
 
 if __name__ == '__main__':

@@ -77,7 +77,8 @@ def smape(y_true, y_pred):
     return 100 * np.mean(2 * np.abs(y_pred - y_true) / (np.abs(y_true) + np.abs(y_pred) + 1e-8))
 
 def main():
-    filepath = 'd:/new_crop_data/historical_data_2018/P11001.json'
+    from paths import DATA_DIR
+    filepath = str(DATA_DIR / 'P11001.json')
     df_aligned, p_id, p_name = load_and_preprocess(filepath)
     
     df_feat, feature_cols = generate_features(df_aligned)

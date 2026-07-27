@@ -498,13 +498,15 @@ def process_single_product(filepath, temp_dir, features):
     return product_id
 
 def main():
-    results_dir = "d:/new_crop_data/experiments_results"
+    from paths import EXPERIMENTS_DIR
+    results_dir = str(EXPERIMENTS_DIR)
     temp_dir = os.path.join(results_dir, ".temp")
     
     # Use existing cache if available
     os.makedirs(temp_dir, exist_ok=True)
     
-    json_pattern = "d:/new_crop_data/historical_data_2018/*.json"
+    from paths import DATA_GLOB
+    json_pattern = DATA_GLOB
     filepaths = glob.glob(json_pattern)
     print(f"Found {len(filepaths)} products to process.")
     

@@ -1,0 +1,9 @@
+Highlights
+
+Beyond the Random Walk: Horizon-Weighted Temporal Fusion Transformers for Thai Agricultural Commodity Price Forecasting
+
+- A horizon-weighted quantile loss rebalances gradients across forecast horizons
+- One pooled Temporal Fusion Transformer spans 404 Thai crop price series
+- A single pooled model outperforms the Lag-1 baseline on MAE, SMAPE and RMSE
+- One-year forecast error falls 37% versus naive persistence out-of-sample
+- Gains are statistically significant and hold against modern foundation models

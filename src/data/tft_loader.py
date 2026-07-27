@@ -1,4 +1,5 @@
 import glob
+import os
 import numpy as np
 import pandas as pd
 from src.data.loader import CropDataLoader, EmptySeriesError
@@ -11,13 +12,19 @@ def build_dataset():
     from the forecast date and do not leak price information.
     """
     loader = CropDataLoader()
-    json_pattern = "d:/new_crop_data/historical_data_2018/*.json"
+    from paths import DATA_GLOB
+    json_pattern = DATA_GLOB
     filepaths = glob.glob(json_pattern)
     print(f"Found {len(filepaths)} files.")
+
+    # optional cap for fast smoke tests (0 = no cap, use all products)
+    max_products = int(os.environ.get("TFT_MAX_PRODUCTS", "0"))
 
     dfs = []
     processed = 0
     for fp in filepaths:
+        if max_products and processed >= max_products:
+            break
         try:
             df = loader.load_and_preprocess(fp)
             if len(df) >= 70:

@@ -1,11 +1,16 @@
 import torch
-from pytorch_forecasting.metrics import MultiHorizonMetric
-import torch.nn.functional as F
+from pytorch_forecasting.metrics import QuantileLoss
 
-class HorizonWeightedQuantileLoss(MultiHorizonMetric):
+
+class HorizonWeightedQuantileLoss(QuantileLoss):
     """
-    Quantile loss with horizon weighting w(h) = 1 / h^gamma.
+    Quantile (pinball) loss with horizon weighting w(h) = 1 / h^gamma.
+
+    Subclassing QuantileLoss is load-bearing: TemporalFusionTransformer.from_dataset
+    deduces the output head size via isinstance(loss, QuantileLoss), and the median
+    extraction in to_prediction() relies on the QuantileLoss implementation.
     """
+
     def __init__(
         self,
         quantiles=[0.1, 0.5, 0.9],
@@ -17,31 +22,19 @@ class HorizonWeightedQuantileLoss(MultiHorizonMetric):
 
     def loss(self, y_pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         """
-        Calculate loss.
+        Calculate horizon-weighted pinball loss.
 
         Args:
             y_pred: network output (batch_size, n_timesteps, n_quantiles)
             target: actual values (batch_size, n_timesteps)
 
         Returns:
-            torch.Tensor: loss
+            torch.Tensor: per-element weighted losses (batch_size, n_timesteps, n_quantiles)
         """
-        # (batch_size, n_timesteps, n_quantiles)
-        losses = []
-        for i, q in enumerate(self.quantiles):
-            errors = target - y_pred[..., i]
-            losses.append(torch.max((q - 1) * errors, q * errors).unsqueeze(-1))
-            
-        losses = torch.cat(losses, dim=-1) # (batch_size, n_timesteps, n_quantiles)
-        
-        # apply horizon weights
+        losses = super().loss(y_pred, target)  # (batch_size, n_timesteps, n_quantiles)
+
         n_timesteps = losses.shape[1]
         h = torch.arange(1, n_timesteps + 1, device=losses.device, dtype=losses.dtype)
-        weights = 1.0 / (h ** self.gamma) # (n_timesteps,)
-        
-        # expand weights to match shape
-        weights = weights.view(1, n_timesteps, 1)
-        
-        weighted_losses = losses * weights
-        
-        return weighted_losses
+        weights = (h ** -self.gamma).view(1, n_timesteps, 1)
+
+        return losses * weights

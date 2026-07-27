@@ -1,0 +1,60 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# ---- LaTeX build artefacts ----
+# main.pdf, supplementary.pdf and cover_letter.pdf ARE tracked on purpose:
+# they are the submitted files. Only the intermediates are ignored.
+*.aux
+*.log
+*.out
+*.spl
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.bbl
+*.blg
+
+# ---- Large experiment artefacts (regenerable; see README) ----
+# GitHub blocks files over 100 MB. predictions.csv alone is ~491 MB and
+# residual_hybrid_predictions.csv ~100 MB, and neither is needed to reproduce
+# any number in the paper.
+experiments_results/predictions.csv
+experiments_results/residual_hybrid_predictions.csv
+experiments_results/.temp/
+experiments_results/*.ckpt
+experiments_results/*_predictions.npz
+lightning_logs/
+
+# Keep the two artefacts the published results depend on. Everything above is
+# excluded first, then these are force-included via .gitattributes/README
+# instructions; if you prefer to ship them, un-ignore explicitly:
+!experiments_results/tft_hw_quantile_gamma_4_5.ckpt
+!experiments_results/tft_hw_quantile_gamma_4_5_predictions.npz
+
+# ---- Superseded figure variants, not referenced by the manuscript ----
+paper/images/error_distributions.png
+paper/images/tft_attention.png
+paper/images/tft_attention_5percent.png
+paper/images/tft_decoder_vars.png
+paper/images/tft_decoder_vars_5percent.png
+paper/images/tft_encoder_vars.png
+paper/images/tft_encoder_vars_5percent.png
+paper/images/tft_static_vars.png
+paper/images/tft_static_vars_5percent.png
+
+# ---- Internal working notes, never publish ----
+# Records working decisions the authors chose not to surface in the manuscript.
+NOTES_INTERNAL.md
+PROJECT.md
+
+# ---- Local scratch ----
+.pdf_qa/
+*.tmp
+.DS_Store
+Thumbs.db

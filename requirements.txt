@@ -1,0 +1,27 @@
+# Versions are the ones the reported results were produced with.
+# torch is pinned to the CUDA 12.1 build; install it from the PyTorch index:
+#   pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cu121
+# then:
+#   pip install -r requirements.txt
+
+torch==2.5.1
+pytorch-forecasting==1.7.0
+lightning==2.6.5
+pytorch-lightning==2.5.6
+
+numpy==2.2.6
+pandas==2.3.3
+scipy==1.16.3
+scikit-learn==1.7.2
+statsmodels==0.14.6
+lightgbm==4.6.0
+joblib==1.5.2
+matplotlib==3.10.7
+
+# Only needed to reproduce the zero-shot foundation-model row of Table 5.
+chronos-forecasting==2.3.0
+
+# Only needed to re-run the TFT architecture search of Supplementary Section S2.
+optuna==4.9.0
+optuna-integration==4.9.0
+pypdf==6.12.2

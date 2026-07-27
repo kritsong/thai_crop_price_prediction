@@ -1,49 +1,148 @@
-# Academic Paper Revision Package: Crop Price Forecasting
+# Horizon-Weighted Temporal Fusion Transformers for Thai Agricultural Commodity Price Forecasting
 
-This folder is a self-contained package designed for an AI assistant to review, verify, and revise our academic manuscript on multi-scale crop price forecasting.
+Code and reproduction scripts for the paper *"Beyond the Random Walk:
+Horizon-Weighted Temporal Fusion Transformers for Thai Agricultural Commodity
+Price Forecasting."*
 
-## Package Directory Structure
-
-- **`paper/final_paper.md`**: The primary academic manuscript file. Open and edit this file to perform revisions.
-- **`paper/images/`**: Contains manuscript figure files; `final_paper.md` must embed exactly 11.
-- **`src/`**: The core forecasting pipeline source code (data loading, preprocessing, feature engineering, and model training).
-- **`results/`**: Standardized quantitative evaluation results (`metrics.csv`, `summary_report.md`, and `exhaustive_metrics_with_da.csv`).
-- **`verify_keywords.py`**: Compliance script checking for negative constraints and image counts.
-- **`verify_experiments.py`**: E2E pipeline verification test suite.
-- **`PROJECT.md`**: Project milestone definitions and interface contracts.
-
----
-
-## Verification Commands
-
-To check the compliance and validity of any edits you make to the paper or code, run the following verification steps from the root of this folder:
-
-1. **Verify Paper Constraints (Negative Keywords & Images)**:
-   ```bash
-   conda run -n base python verify_keywords.py
-   ```
-   *Ensures the paper contains zero forbidden weather terms (weather, rain, temperature, climate, precipitation) and exactly 11 embedded images.*
-
-2. **Verify Code and Experiment Pipeline (88 E2E Test Cases)**:
-   ```bash
-   conda run -n base python verify_experiments.py
-   ```
-   *Verifies that all baseline and deep learning models train, validate, and compute metrics correctly without target leakage or numerical errors.*
+The paper asks why pooled deep models routinely lose to a naive
+last-observed-price rule on low signal-to-noise agricultural price series, and
+introduces a **Horizon-Weighted Quantile Loss**, `w(h) = 1/h^gamma`, that
+resolves the multi-scale gradient conflict responsible. Evaluation covers 404
+Thai crop products from 2018 to 2025 under a matched-window protocol, against
+persistence, seasonal-naive, drift, ARIMA, LightGBM, MLP, LSTM, Transformer and
+a zero-shot time-series foundation model.
 
 ---
 
-## Documented Results and Narrative
+## 1. Setup
 
-When editing `paper/final_paper.md`, make sure you preserve the following key findings and constraints:
+```bash
+python -m venv .venv && . .venv/bin/activate      # Windows: .venv\Scripts\activate
+pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cu121
+pip install -r requirements.txt
+```
 
-1. **Short-Term Horizon ($t+20$)**:
-   - The naive local **Lag-1 Persistence baseline** remains the top predictor (MAE of **15.76 THB** / SMAPE of **8.25%**) due to high daily autocorrelation.
-   - Standard unweighted sequence models (TFT $\gamma=0.0$) score a much higher MAE of **29.07 THB**.
-   - Our proposed **Horizon-Weighted Loss** with Inverse-Square decay ($\gamma=2.0$) achieves a massive near-term improvement, reducing MAE to **19.72 THB** (a **32.2% error reduction** over standard TFT), significantly bridging the gap to the persistence baseline.
+A CUDA GPU is needed to retrain the TFT or to run the foundation-model baseline.
+Every analysis step below runs on CPU from saved artefacts.
 
-2. **Long-Term Horizon ($t+250$)**:
-   - Random walk drift variance accumulates as $\mathcal{O}(\sqrt{h})$, causing the Lag-1 baseline error to spike to **73.08 THB** at one year.
-   - The global TFT successfully models long-term macro-seasonal trends, with the Linear decay model ($\gamma=1.0$) achieving the best one-year MAE of **54.97 THB** (a **24.8% error reduction** compared to the baseline).
+### Where the data and artefacts live
 
-3. **Overall Average**:
-   - The champion Inverse-Square model ($\gamma = 2.0$) achieves the lowest overall average MAE of **40.15 THB** across all horizons, outperforming both the Lag-1 baseline (**42.23 THB**) and the standard unweighted TFT (**42.70 THB**).
+`paths.py` resolves the two directories that sit outside version control, in
+this order: an environment variable, then a repository-local directory, then a
+sibling directory beside the repository.
+
+| Variable | Contents | Repository-local default |
+| :--- | :--- | :--- |
+| `CROP_DATA_DIR` | raw `*.json` price files, one per product | `./data/historical_data_2018` |
+| `CROP_EXPERIMENTS_DIR` | checkpoints and saved per-window predictions | `./experiments_results` |
+
+```bash
+python paths.py          # prints the resolved paths and whether they exist
+```
+
+Large artefacts are excluded from git. Rebuilding the selected-model tables and
+figures without retraining requires its checkpoint
+(`tft_hw_quantile_gamma_4_5.ckpt`, 1.1 MB) and saved per-window predictions
+(`tft_hw_quantile_gamma_4_5_predictions.npz`, 9.7 MB). Rebuilding the complete
+17-point sweep additionally requires the corresponding per-gamma metric and
+prediction files. Version-controlled aggregate CSV files are provided so the
+published tables and sweep figure remain auditable without those large files.
+
+---
+
+## 2. Reproducing the paper
+
+### Tables
+
+| Table | Content | Command |
+| :--- | :--- | :--- |
+| 1, 2 | product inventory, stationarity | `python run_eda.py` |
+| 3, 4 | data partition, model configuration | descriptive, no script |
+| 5 | reference suite | `python -m src.models.train`, then `python run_extra_baselines.py` and `python run_chronos_zeroshot.py` |
+| 6 | decay-exponent sweep | `python run_gamma_sweep.py` |
+| 7 | selected model vs baseline, with significance tests | `python -m src.models.train_tft --gamma 4.5`, then `python build_publication_metrics.py` |
+| 8, 9 | temporal stability, calibrated intervals | `python build_publication_metrics.py` |
+
+### Figures
+
+| Figure | Content | Command |
+| :--- | :--- | :--- |
+| 1-4 | ACF/PACF, price trends, stationarity, correlation | `python run_eda.py` |
+| 5 | loss weighting decay curves | `python generate_loss_curve_figure.py` |
+| 6 | MAE against decay exponent | `python generate_gamma_sweep_figure.py` |
+| 7 | qualitative forecasts, deliberately extreme cases | `python generate_qualitative_figure.py` |
+| 8 | qualitative forecasts, one group-median case per commodity group | `python generate_typical_qualitative_figure.py` |
+| 9-12 | attention and variable selection | `python generate_interpretability_figures.py` |
+
+### Supplementary material
+
+```bash
+python run_reference_search.py     # equal-budget hyperparameter search for every reference class
+python build_supplement.py         # writes paper/supplementary.tex
+```
+
+### Building the documents
+
+```bash
+python build_latex.py        && (cd paper && pdflatex main.tex && pdflatex main.tex)
+python build_supplement.py   && (cd paper && pdflatex supplementary.tex)
+python build_cover_letter.py && (cd paper && pdflatex cover_letter.tex)
+```
+
+### Verification
+
+```bash
+python verify_experiments.py   # 88 unit and end-to-end tests over the pipeline
+python verify_keywords.py      # manuscript integrity: figure paths and embedded-image count
+python verify_publication.py   # journal limits, placeholders, artifacts and PDFs
+```
+
+After all automated checks pass, complete the author-only confirmations in
+`SUBMISSION_CHECKLIST.md`. Those declarations require the authors' direct
+approval and cannot be inferred from the repository.
+
+---
+
+## 3. Repository layout
+
+```
+paths.py                       central path resolution, used by every script
+src/data/                      loading, cleaning, business-day alignment
+src/features/generator.py      leakage-safe feature construction
+src/models/loss.py             HorizonWeightedQuantileLoss
+src/models/train_tft.py        TFT training, evaluation, interval calibration
+src/models/train.py            reference models (ARIMA, LightGBM, MLP, LSTM, GRU, Transformer)
+results/                       aggregated metrics consumed by the manuscript
+paper/                         manuscript source, figures and built PDFs
+```
+
+Two implementation details worth knowing before modifying anything:
+
+- **`HorizonWeightedQuantileLoss` subclasses `QuantileLoss`, not
+  `MultiHorizonMetric`.** `pytorch_forecasting` deduces `output_size` from an
+  `isinstance` check against `QuantileLoss`. Subclassing the wrong base silently
+  produces `output_size=1` and the model fails at runtime.
+- **The target normaliser is fitted once on the training window and never
+  refreshed.** This is a real limitation, quantified rather than hidden, in
+  Section 4.8 of the paper.
+
+---
+
+## 4. Data provenance and licence
+
+Raw prices come from the Ministry of Commerce (Thailand), Department of Internal
+Trade, via the MOC Open Data portal, "Agricultural Product Price" dataset.
+Check the portal's own terms before redistributing the raw files; if the terms
+are unclear, run the pipeline against a fresh download rather than a mirrored
+copy.
+
+The code here is released under the licence in `LICENSE`. The underlying price
+data remains the property of its original publisher and is not covered by that
+licence.
+
+---
+
+## 5. Citation
+
+Citation details will be added on publication. Until then, contact Kritaphat
+Songsri-in at `kritaphat_son@nstru.ac.th`.
