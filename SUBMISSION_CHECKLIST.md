@@ -13,9 +13,9 @@ the statements below; they cannot be established from code or public records.
 - [ ] The declaration of AI-assisted tools is complete and acceptable to all authors.
 - [ ] Corresponding-author email and postal address are current; add a telephone number in Editorial Manager if requested.
 - [ ] Optional ORCID identifiers have been collected and entered in Editorial Manager.
-- [ ] The cover-letter date is refreshed if submission occurs after 27 July 2026.
+- [ ] The cover-letter date is refreshed if submission occurs after 31 July 2026.
 - [ ] The journal's current author guide and submission questions are reviewed immediately before upload.
-- [ ] The editor will accept the 42-page double-spaced review PDF. The KBS guide prefers at most 20 pages including figures, although it labels this a preference; if enforced, move exploratory detail and secondary analyses to the supplement before submission.
+- [x] The double-spaced review PDF is at the KBS guide's stated 20-page preference; detailed diagnostics and secondary analyses are preserved in the supplementary PDF.
 
 Suggested upload set: `paper/main.tex`, the 12 files in `paper/images/`,
 `paper/main.pdf` for review, `paper/supplementary.tex`,

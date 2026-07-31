@@ -30,6 +30,14 @@
   ],
   "selection_metric": "mean MAE across reported horizons",
   "selected_gamma": 4.5,
+  "sweep_seed": 42,
+  "selected_artifact_seed": 42,
+  "seed_sensitivity": [
+    42,
+    43,
+    44
+  ],
+  "interval_method": "validation-fitted conformal-style scaling; no formal coverage guarantee",
   "test_samples_per_horizon": 110292,
   "products": 404
 }

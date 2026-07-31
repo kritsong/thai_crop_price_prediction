@@ -1,4 +1,5 @@
 import warnings
+import os
 import matplotlib; matplotlib.use('Agg')
 import pandas as pd
 import numpy as np
@@ -12,6 +13,7 @@ from pytorch_forecasting.data import GroupNormalizer
 from optuna.integration import PyTorchLightningPruningCallback
 
 from src.data.tft_loader import build_dataset
+from paths import RESULTS_DIR
 
 warnings.filterwarnings("ignore")
 
@@ -27,7 +29,7 @@ def objective(trial):
     full_df, _ = build_dataset()
     
     max_prediction_length = 250
-    max_encoder_length = 120
+    max_encoder_length = int(os.environ.get("TFT_ENCODER_LENGTH", "30"))
     
     train_cutoff_idx = time_idx_for_date(full_df, "2023-01-02") - 1
     val_start_idx = time_idx_for_date(full_df, "2023-01-02")
@@ -73,7 +75,7 @@ def objective(trial):
     attention_head_size = trial.suggest_categorical("attention_head_size", [1, 2, 4])
     dropout = trial.suggest_float("dropout", 0.1, 0.3)
     hidden_continuous_size = trial.suggest_categorical("hidden_continuous_size", [8, 16, 32])
-    learning_rate = trial.suggest_loguniform("learning_rate", 1e-3, 0.1)
+    learning_rate = trial.suggest_float("learning_rate", 1e-3, 0.1, log=True)
 
     # Model
     tft = TemporalFusionTransformer.from_dataset(
@@ -114,6 +116,10 @@ if __name__ == "__main__":
     study = optuna.create_study(direction="minimize", pruner=pruner)
     print("Starting Optuna TFT Hyperparameter Tuning (10 Trials)...")
     study.optimize(objective, n_trials=10)
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    study.trials_dataframe().to_csv(
+        RESULTS_DIR / "tft_architecture_search.csv", index=False
+    )
 
     print("Number of finished trials: {}".format(len(study.trials)))
     print("Best trial:")
@@ -122,3 +128,4 @@ if __name__ == "__main__":
     print("  Params: ")
     for key, value in trial.params.items():
         print("    {}: {}".format(key, value))
+    print("Saved trial ledger to", RESULTS_DIR / "tft_architecture_search.csv")

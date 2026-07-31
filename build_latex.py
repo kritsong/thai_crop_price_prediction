@@ -59,8 +59,8 @@ def inline(s):
         c = codes[int(m.group(1))]
         c = c.replace("\\", r"\textbackslash{}").replace("_", r"\_").replace("%", r"\%").replace("&", r"\&").replace("#", r"\#")
         return r"\texttt{%s}" % c
-    s = re.sub("\x00(\d+)\x00", back, s)
-    return re.sub("\x01(\d+)\x01", lambda m: r"\url{%s}" % urls[int(m.group(1))], s)
+    s = re.sub(r"\x00(\d+)\x00", back, s)
+    return re.sub(r"\x01(\d+)\x01", lambda m: r"\url{%s}" % urls[int(m.group(1))], s)
 
 # ---- locate blocks ----
 def idx(pred):
@@ -98,6 +98,29 @@ def convert_body(body):
         raw = body[i]
         s = raw.rstrip()
         st = s.strip()
+
+        # Content retained in the master Markdown but emitted only in the
+        # supplementary PDF. This keeps one auditable scientific source while
+        # allowing the journal review manuscript to meet its page preference.
+        if st == "<!-- supplement-only-start -->":
+            close_lists()
+            i += 1
+            while i < n and body[i].strip() != "<!-- supplement-only-end -->":
+                i += 1
+            if i >= n:
+                raise ValueError("unclosed supplement-only block")
+            i += 1
+            continue
+        counter = re.fullmatch(
+            r"<!-- set-(table|figure|subsection)-counter:(\d+) -->", st
+        )
+        if counter:
+            close_lists()
+            out.append(
+                r"\setcounter{%s}{%s}" % (counter.group(1), counter.group(2))
+            )
+            i += 1
+            continue
 
         # blank — do NOT close lists (multi-paragraph items rely on this);
         # lists are closed by headings/figures/tables or non-continuation paragraphs
@@ -298,10 +321,9 @@ for p in abstract:
     tex.append(esc_plain(p))
     tex.append("")
 tex.append(r"\end{abstract}")
-tex.append(r"\begin{highlights}")
-for h in highlights:
-    tex.append(r"\item " + esc_plain(h))
-tex.append(r"\end{highlights}")
+# Elsevier highlights are uploaded as the separate editable
+# ``paper/highlights.txt`` artifact. Keeping them out of the review manuscript
+# avoids duplicating that submission component as an extra PDF page.
 tex.append(r"\begin{keyword}")
 tex.append(" \\sep ".join(esc_plain(k) for k in kw_list))
 tex.append(r"\end{keyword}")

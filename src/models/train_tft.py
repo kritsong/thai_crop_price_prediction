@@ -107,9 +107,13 @@ def fit_blend_alphas(val_store, val_start_idx):
 
 
 def fit_pi_scales(val_store, val_start_idx, target_coverage=0.8):
-    """Fit, per horizon, a conformal-style scale factor s for the quantile
+    """Fit, per horizon, an empirical conformal-style scale factor s for the quantile
     interval so that [median - s*(median-lower), median + s*(upper-median)]
-    achieves the target coverage on the validation year."""
+    achieves approximately the target coverage on the validation year.
+
+    This is not a formal split-conformal guarantee because the validation year
+    also informs training monitoring/model selection and the windows overlap.
+    """
     scales = {}
     eps = 1e-8
     for h in HORIZONS:
@@ -241,7 +245,7 @@ def main():
     blend_alphas = fit_blend_alphas(val_store, val_start_idx)
     pi_scales = fit_pi_scales(val_store, val_start_idx)
     print(f"Fitted blend alphas (validation MAE-optimal): {blend_alphas}")
-    print(f"Fitted 80% PI conformal scales: { {h: round(s, 3) for h, s in pi_scales.items()} }")
+    print(f"Fitted empirical 80% PI scales: { {h: round(s, 3) for h, s in pi_scales.items()} }")
 
     print("Evaluating on Test Set Horizons (2024-2025)...")
     test_store = collect_forecasts(tft, test_dataloader)

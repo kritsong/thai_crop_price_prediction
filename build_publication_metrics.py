@@ -44,6 +44,19 @@ def smape(actual: np.ndarray, predicted: np.ndarray) -> float:
     return float(np.mean(values))
 
 
+def holm_adjust(p_values: np.ndarray) -> np.ndarray:
+    """Holm step-down family-wise-error adjustment without an extra dependency."""
+    values = np.asarray(p_values, dtype=float)
+    order = np.argsort(values)
+    adjusted = np.empty_like(values)
+    running_max = 0.0
+    m = len(values)
+    for rank, idx in enumerate(order):
+        running_max = max(running_max, (m - rank) * values[idx])
+        adjusted[idx] = min(running_max, 1.0)
+    return adjusted
+
+
 def years(label_idx: np.ndarray) -> np.ndarray:
     idx = label_idx.astype(int)
     if idx.min() < 0 or idx.max() >= len(DATE_INDEX):
@@ -161,6 +174,13 @@ def build_champion_tables() -> tuple[pd.DataFrame, pd.DataFrame]:
         }
     )
     dm = pd.DataFrame(dm_rows)
+    horizon_mask = dm["horizon"].ne(0)
+    dm.loc[horizon_mask, "p_ttest_holm"] = holm_adjust(
+        dm.loc[horizon_mask, "p_ttest"].to_numpy()
+    )
+    dm.loc[horizon_mask, "p_wilcoxon_holm"] = holm_adjust(
+        dm.loc[horizon_mask, "p_wilcoxon"].to_numpy()
+    )
     dm.to_csv(RESULTS_DIR / "dm_tests.csv", index=False)
     return champion, dm
 
@@ -214,6 +234,10 @@ def write_provenance(selection: pd.DataFrame) -> None:
         "candidate_gammas": selection["Gamma"].tolist(),
         "selection_metric": "mean MAE across reported horizons",
         "selected_gamma": 4.5,
+        "sweep_seed": 42,
+        "selected_artifact_seed": 42,
+        "seed_sensitivity": [42, 43, 44],
+        "interval_method": "validation-fitted conformal-style scaling; no formal coverage guarantee",
         "test_samples_per_horizon": 110292,
         "products": 404,
     }

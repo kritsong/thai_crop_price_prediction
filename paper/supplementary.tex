@@ -2,11 +2,14 @@
 \usepackage[margin=2.7cm]{geometry}
 \usepackage{booktabs}
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{graphicx}
+\graphicspath{{images/}}
 \usepackage[hidelinks]{hyperref}
 \setlength{\emergencystretch}{2em}
 \hypersetup{pdftitle={Supplementary Material: Horizon-Weighted Temporal Fusion Transformers for Thai Agricultural Commodity Price Forecasting},pdfauthor={Kritaphat Songsri-in, Auyporn Chukeaw, Munlika Rattaphun, Walaiporn Sornkliang, Rattayagon Thaiphan}}
 \renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thefigure}{S\arabic{figure}}
 \renewcommand{\thesection}{S\arabic{section}}
 \title{Supplementary Material for ``Beyond the Random Walk: Horizon-Weighted Temporal Fusion Transformers for Thai Agricultural Commodity Price Forecasting''}
 \author{Kritaphat Songsri-in, Auyporn Chukeaw, Munlika Rattaphun,\\
@@ -19,13 +22,13 @@ Walaiporn Sornkliang, and Rattayagon Thaiphan}
 A recurring concern in comparative forecasting studies is that the proposed model receives careful tuning while reference models run at defaults, biasing the comparison. This supplement documents the configuration provenance of every learned model in the study and reports a hyperparameter search for each learned reference class of Table~5 under one common protocol.
 
 \begin{itemize}
-\item \textbf{Equal, deliberately light budgets.} The TFT architecture was fixed once using a 10-trial search (Section~S2) and held constant across all seventeen decay exponents, because the contribution of the paper is the loss geometry rather than architecture optimization. Each learned reference class therefore also receives a 10-configuration search (Section~S3), and the configuration used in the main paper is always one of the ten candidates.
+\item \textbf{Matched architecture-search budgets.} The TFT architecture was informed by a 10-trial exploratory search (Section~S2) and held constant across all seventeen loss exponents. Each learned reference class receives the same 10-configuration architecture or hyperparameter budget (Section~S3), and the configuration used in the main paper is always one candidate. The separate seventeen-point loss sweep is the paper's primary method ablation and is disclosed in full; the total tuning budgets are therefore not identical.
 \item \textbf{Validation-only selection.} Every candidate is fitted on labels within 2018--2022 only and scored by matched-window MAE on validation windows whose horizon-$h$ label falls inside 2023 (12{,}120 windows at $t{+}20$, 28{,}280 at $t{+}60$, 52{,}520 at $t{+}120$, and 105{,}040 at $t{+}250$ over the 404 crops), averaged over $h \in \{20, 60, 120, 250\}$. No test-period information enters any selection.
 \item \textbf{Identical final conditions.} The validation-selected configuration is then refitted on labels through 2023, the same training window the published reference models used, and evaluated on the identical 2024--2025 matched test windows as Table~5 of the main paper (110{,}292 windows per horizon, 404 crops).
 \end{itemize}
 
 \section{TFT architecture provenance}
-The TFT architecture used throughout the main paper (hidden size 64, 4 attention heads, continuous-variable encoding size 8, dropout 0.1, learning rate 0.01) was fixed before the decay-exponent sweep, informed by a 10-trial Optuna search (median pruner, 3-epoch budget per trial) minimizing validation loss under the unweighted quantile objective. Table~\ref{tab:tftspace} lists the search space. The architecture was then held constant across all seventeen decay exponents of the main experiment, so that every accuracy difference in Section~5.2 of the main paper is attributable to the loss weighting alone. The decay exponent itself, the single hyperparameter this paper is about, was not searched stochastically but swept exhaustively over $\gamma \in \{0.0, 0.5, \dots, 8.0\}$ with full per-horizon results disclosed in Table~6 of the main paper.
+The TFT architecture used throughout the main paper (hidden size 64, 4 attention heads, continuous-variable encoding size 8, dropout 0.1, learning rate 0.01) was fixed before the decay-exponent sweep and was informed by a 10-trial exploratory Optuna search (median pruner, 3-epoch budget per trial) under the unweighted quantile objective. Table~\ref{tab:tftspace} lists the search space. The historical trial ledger was not retained, so this is architecture provenance rather than a reproducible claim that these values were the unique validation optimum. The architecture was then held constant across all seventeen decay exponents of the main experiment. The exponent was swept exhaustively over $\gamma \in \{0.0, 0.5, \dots, 8.0\}$, with full per-horizon results disclosed in Table~6 of the main paper.
 
 \begin{table}[htbp]\centering
 \caption{Search space of the 10-trial TFT architecture search.}
@@ -45,7 +48,7 @@ Learning rate & log-uniform $[10^{-3}, 10^{-1}]$ \\
 \end{table}
 
 \section{Reference-model search spaces and validation results}
-Tables~\ref{tab:lgb}--\ref{tab:tf} report all ten candidate configurations per class with their per-horizon validation MAE. Configuration~0 is always the configuration used in the main paper. The gradient-boosting search varies tree complexity, regularization, and sampling; the MLP search varies width, dropout, and learning rate around the published values; the LSTM search varies hidden-state size and learning rate; the Transformer search varies model width, depth, head count, and learning rate. Training budgets (boosting rounds, epochs, batch sizes) are held at their published values within each class so that the search isolates configuration rather than compute. The GRU variant of the recurrent class is omitted from the search for the reason given in Section~4.3 of the main paper; it is not part of Table~5 and does not outperform the naive baseline overall.
+Tables~\ref{tab:lgb}--\ref{tab:tf} report all ten candidate configurations per class with their per-horizon validation MAE. Configuration~0 is always the original configuration used in the main paper. The gradient-boosting search varies tree complexity, regularization, and sampling; the MLP search varies width, dropout, and learning rate around the original values; the LSTM search varies hidden-state size and learning rate; the Transformer search varies model width, depth, head count, and learning rate. Training budgets (boosting rounds, epochs, batch sizes) are held at their original values within each class so that the search isolates configuration rather than compute. The GRU variant of the recurrent class is omitted from the search for the reason given in Section~4.3 of the main paper; it is not part of Table~5 and does not outperform the naive baseline overall.
 
 \begin{table}[htbp]\centering
 \caption{Global LightGBM search. Validation MAE (THB) per horizon; the validation-selected configuration is bolded.}
@@ -56,7 +59,7 @@ Tables~\ref{tab:lgb}--\ref{tab:tf} report all ten candidate configurations per c
 \toprule
 Cfg & Parameters & $t{+}20$ & $t{+}60$ & $t{+}120$ & $t{+}250$ & Mean \\
 \midrule
-0 (published) & leaves 2633, depth 8, min/leaf 700, lr 0.05, ff 0.99, bf 0.74, freq 3 & 26.79 & 46.95 & 62.81 & 77.03 & 53.39 \\
+0 (original) & leaves 2633, depth 8, min/leaf 700, lr 0.05, ff 0.99, bf 0.74, freq 3 & 26.79 & 46.95 & 62.81 & 77.03 & 53.39 \\
 1 & leaves 31, depth -1, min/leaf 20, lr 0.05, ff 1.0, bf 1.0, freq 0 & 28.98 & 47.03 & 64.49 & 76.29 & 54.20 \\
 2 & leaves 63, depth -1, min/leaf 20, lr 0.1, ff 0.9, bf 0.8, freq 1 & 30.52 & 47.34 & 63.65 & 76.44 & 54.49 \\
 3 & leaves 127, depth 8, min/leaf 100, lr 0.05, ff 0.9, bf 0.8, freq 1 & 32.21 & 48.21 & 64.02 & 75.53 & 54.99 \\
@@ -79,7 +82,7 @@ Cfg & Parameters & $t{+}20$ & $t{+}60$ & $t{+}120$ & $t{+}250$ & Mean \\
 \toprule
 Cfg & Parameters & $t{+}20$ & $t{+}60$ & $t{+}120$ & $t{+}250$ & Mean \\
 \midrule
-0 (published) & $h_1$ 128, $h_2$ 64, dropout 0.47, lr 0.0034 & 42.51 & 53.62 & 63.96 & 84.44 & 61.13 \\
+0 (original) & $h_1$ 128, $h_2$ 64, dropout 0.47, lr 0.0034 & 42.51 & 53.62 & 63.96 & 84.44 & 61.13 \\
 1 & $h_1$ 128, $h_2$ 64, dropout 0.1, lr 0.001 & 34.18 & 49.51 & 64.93 & 94.60 & 60.81 \\
 2 & $h_1$ 128, $h_2$ 64, dropout 0.3, lr 0.003 & 33.83 & 45.31 & 58.24 & 78.03 & 53.85 \\
 3 & $h_1$ 256, $h_2$ 128, dropout 0.3, lr 0.001 & 35.25 & 50.47 & 64.86 & 89.54 & 60.03 \\
@@ -102,7 +105,7 @@ Cfg & Parameters & $t{+}20$ & $t{+}60$ & $t{+}120$ & $t{+}250$ & Mean \\
 \toprule
 Cfg & Parameters & $t{+}20$ & $t{+}60$ & $t{+}120$ & $t{+}250$ & Mean \\
 \midrule
-0 (published) & hidden 16, lr 0.01 & 51.87 & 59.75 & 69.26 & 80.11 & 65.25 \\
+0 (original) & hidden 16, lr 0.01 & 51.87 & 59.75 & 69.26 & 80.11 & 65.25 \\
 1 (selected) & hidden 32, lr 0.01 & \textbf{43.27} & \textbf{55.61} & \textbf{65.91} & \textbf{81.46} & \textbf{61.56} \\
 2 & hidden 64, lr 0.01 & 39.87 & 52.50 & 69.52 & 95.43 & 64.33 \\
 3 & hidden 128, lr 0.01 & 38.33 & 52.05 & 68.84 & 93.43 & 63.16 \\
@@ -125,7 +128,7 @@ Cfg & Parameters & $t{+}20$ & $t{+}60$ & $t{+}120$ & $t{+}250$ & Mean \\
 \toprule
 Cfg & Parameters & $t{+}20$ & $t{+}60$ & $t{+}120$ & $t{+}250$ & Mean \\
 \midrule
-0 (published) & $d_{model}$ 32, layers 2, heads 4, lr 0.003 & 60.08 & 66.45 & 70.42 & 104.78 & 75.43 \\
+0 (original) & $d_{model}$ 32, layers 2, heads 4, lr 0.003 & 60.08 & 66.45 & 70.42 & 104.78 & 75.43 \\
 1 & $d_{model}$ 64, layers 2, heads 4, lr 0.003 & 49.37 & 56.98 & 64.30 & 92.84 & 65.87 \\
 2 & $d_{model}$ 64, layers 4, heads 4, lr 0.001 & 48.98 & 57.98 & 62.67 & 89.79 & 64.85 \\
 3 & $d_{model}$ 32, layers 4, heads 4, lr 0.003 & 50.67 & 55.67 & 63.59 & 87.13 & 64.27 \\
@@ -140,15 +143,15 @@ Cfg & Parameters & $t{+}20$ & $t{+}60$ & $t{+}120$ & $t{+}250$ & Mean \\
 \end{table}
 
 \section{Test-set impact of validation-selected configurations}
-Table~\ref{tab:impact} reports the 2024--2025 matched-window test MAE of each validation-selected configuration after refitting on labels through 2023. The ``published (rerun)'' column refits the published configuration inside this supplement's pipeline under the same random initialization as the search candidates, and the ``main paper'' column repeats the corresponding overall value of Table~5. For the gradient-boosting class the rerun reproduces the main-paper value essentially exactly, which validates the pipeline; for the neural classes the rerun differs from the main-paper value by several THB in either direction under an identical configuration, a direct illustration of the initialization variance already documented in Section~5.2 of the main paper, and tuning-attributable differences should therefore be read against the rerun column rather than the main-paper column. The matched Lag-1 persistence baseline scores 45.21 THB on the same windows.
+Table~\ref{tab:impact} reports the 2024--2025 matched-window test MAE of each validation-selected configuration after refitting on labels through 2023. The ``original (rerun)'' column refits configuration~0 inside this supplement's pipeline under the same random initialization as the search candidates, and the ``main paper'' column repeats the corresponding overall value of Table~5. For the gradient-boosting class the rerun reproduces the main-paper value essentially exactly, which validates the pipeline; for the neural classes the rerun differs from the main-paper value by several THB in either direction under an identical configuration, illustrating initialization variance. Tuning-attributable differences should therefore be read against the rerun column rather than the main-paper column. The matched Lag-1 persistence baseline scores 45.21 THB on the same windows.
 
 \begin{table}[htbp]\centering
-\caption{Test MAE (THB) of validation-selected reference configurations against the published configurations.}
+\caption{Test MAE (THB) of validation-selected reference configurations against the original Table~5 configurations.}
 \label{tab:impact}
 \small
 \begin{tabular}{llccccccc}
 \toprule
- & & \multicolumn{5}{c}{Selected configuration} & Published & Main \\
+ & & \multicolumn{5}{c}{Selected configuration} & Original & Main \\
 Model class & Cfg & $t{+}20$ & $t{+}60$ & $t{+}120$ & $t{+}250$ & Overall & (rerun) & paper \\
 \midrule
 Global LightGBM & 8 & 29.24 & 40.43 & 50.25 & 62.29 & 45.55 & 44.83 & 44.83 \\
@@ -159,9 +162,208 @@ Global Transformer & 4 & 38.66 & 46.29 & 57.00 & 87.14 & 57.27 & 52.88 & 70.82 \
 \end{tabular}
 \end{table}
 
+\section{Selected-exponent seed sensitivity}
+Table~\ref{tab:seeds} reports independent retraining of the selected $\gamma=4.5$ configuration. Exponent selection itself used the common seed-42 sweep and 2023 validation MAE; seeds 43 and 44 are post-selection sensitivity runs. All three runs beat persistence overall and at $t{+}120$ and $t{+}250$, while all remain worse at $t{+}20$. This supports the qualitative horizon pattern but also shows that the exact overall point estimate varies from 39.76 to 43.70 THB.
+
+\begin{table}[htbp]\centering
+\caption{MAE (THB) of the selected exponent under three independent seeds.}
+\label{tab:seeds}
+\small
+\begin{tabular}{lccccc}
+\toprule
+Seed & $t{+}20$ & $t{+}60$ & $t{+}120$ & $t{+}250$ & Overall \\
+\midrule
+42 & 26.51 & 33.81 & 45.75 & 52.97 & 39.76 \\
+43 & 25.37 & 35.59 & 43.82 & 64.09 & 42.22 \\
+44 & 27.31 & 42.80 & 45.26 & 59.44 & 43.70 \\
+Persistence & 15.11 & 30.86 & 51.03 & 83.84 & 45.21 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Data cleaning and exploratory diagnostics}
+Zero prices are treated as missing, rolling 30-day IQR outliers are removed, remaining gaps are forward-filled after business-day alignment, and a one-percent repricing threshold defines the 404-product modeling universe. Table~\ref{tab:inventory} reports the raw inventory; Table~\ref{tab:stationarity} reports level-stationarity rates among the 635 active products. Figures~\ref{fig:acf}--\ref{fig:corr} provide the full diagnostics summarized in Section~3 of the main paper.
+
+\begin{table}[htbp]\centering
+\caption{Product counts and status by group.}\label{tab:inventory}\small
+\begin{tabular}{lrrr}\toprule
+Group & Active & Empty/all-zero & Total \\
+\midrule
+Meat \& Poultry & 98 & 14 & 112 \\
+Aquatic \& Marine & 39 & 6 & 45 \\
+Fresh Vegetables & 89 & 0 & 89 \\
+Organic Veg \& Fruits & 44 & 0 & 44 \\
+Fruits & 64 & 8 & 72 \\
+Food Crops & 82 & 11 & 93 \\
+Oil Crops \& Oils & 95 & 41 & 136 \\
+Wholesale Rice \& Bags & 54 & 0 & 54 \\
+Wholesale Rice to Retailers & 10 & 0 & 10 \\
+Retail Rice & 9 & 1 & 10 \\
+Field Crops & 40 & 4 & 44 \\
+Feed \& Raw Materials & 11 & 4 & 15 \\
+Miscellaneous / Unknown & 0 & 5 & 5 \\
+\textbf{Total} & \textbf{635} & \textbf{94} & \textbf{729} \\
+\bottomrule\end{tabular}\end{table}
+
+\begin{table}[htbp]\centering
+\caption{ADF level-stationarity profiles by market category ($p<0.05$).}\label{tab:stationarity}\small
+\begin{tabular}{lrrr}\toprule
+Category & Active & Minimum price & Maximum price \\
+\midrule
+Retail & 269 & 35.7\% & 33.1\% \\
+Wholesale & 366 & 27.3\% & 25.7\% \\
+\bottomrule\end{tabular}\end{table}
+
+\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{acf_pacf.png}
+\caption{Mean ACF and PACF in levels by product group.}\label{fig:acf}\end{figure}
+\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{price_trend.png}
+\caption{Indexed monthly price trajectories of the six largest groups.}\label{fig:trend}\end{figure}
+\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{stationarity_by_group.png}
+\caption{ADF stationarity rates by product group.}\label{fig:adf}\end{figure}
+\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{correlation_heatmap.png}
+\caption{Price-level correlation among the 40 most liquid series; this deliberately integrated subset is not representative of the full universe, whose mean pairwise level correlation is 0.180.}\label{fig:corr}\end{figure}
+
+\section{Detailed model and loss specification}
+All in-domain learned references use leakage-safe price lags, differences,
+returns, rolling statistics, repricing counters, calendar coordinates, and
+entity identifiers. LightGBM is direct by horizon; the neural references use a
+joint multi-output head; ARIMA is local; and Chronos-Bolt-Base is zero-shot.
+The released source contains the exact feature list and configurations.
+
+The TFT maps product, category, and group identifiers to static embeddings.
+Gated residual networks (GRNs) create context vectors for variable selection,
+LSTM initialization, and static enrichment. With an optional projected residual
+$\mathbf W_s\mathbf a$, a GRN is
+\[
+\operatorname{GRN}(\mathbf a,\mathbf c)=
+\operatorname{LayerNorm}\{\mathbf W_s\mathbf a+
+\operatorname{GLU}(\mathbf W_1\operatorname{ELU}
+(\mathbf W_2\mathbf a+\mathbf W_3\mathbf c+\mathbf b_2)+\mathbf b_1)\}.
+\]
+The variable-selection network combines independently transformed variables as
+\[
+\tilde{\mathbf x}_t=\sum_{j=1}^{M}v_t^{(j)}
+\operatorname{GRN}_{j}(\mathbf x_t^{(j)}),\qquad
+\mathbf v_t=\operatorname{Softmax}(\operatorname{GRN}_v(\mathbf g_t,\mathbf c)).
+\]
+Interpretable multi-head attention uses head-specific query/key projections,
+a shared value projection, and an averaged attention matrix,
+\[
+\tilde{\mathbf A}=\frac1M\sum_{m=1}^{M}
+\operatorname{Softmax}\!\left(
+\frac{(\mathbf Q\mathbf W_Q^{(m)})
+(\mathbf K\mathbf W_K^{(m)})^\top}{\sqrt{d_{\rm attn}}}\right),
+\quad
+\operatorname{IMHA}=\tilde{\mathbf A}\mathbf V\mathbf W_V\mathbf W_O.
+\]
+The output heads target quantiles $\{0.1,0.5,0.9\}$ with pinball loss
+$\rho_q(e)=e(q-\mathbb 1\{e<0\})$. The proposed objective is
+\[
+\mathcal L=\sum_{h=1}^{250}h^{-\gamma}
+\sum_{q\in\{0.1,0.5,0.9\}}\rho_q(y_{t+h}-\hat y_{t+h,q}).
+\]
+Pinball-loss subgradients are bounded, so the paper interprets this as explicit
+loss allocation across decoder steps rather than as a direct measurement of
+gradient-vector conflict.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.9\linewidth]{loss_weighting_curves.png}
+\caption{Power-law loss schedules over the 250-step decoder.}
+\label{fig:weights}
+\end{figure}
+
+\section{Complete loss-exponent sweep}
+Table~\ref{tab:gammafull} reports the complete seed-42 grid used for validation selection; Figure~\ref{fig:gamma} shows the corresponding test-MAE curves. Each exponent is one run, so local non-monotonicity should not be interpreted as a smooth dose response.
+
+\begin{table}[htbp]\centering\scriptsize
+\caption{Seed-42 horizon-weighted TFT results (MAE THB/SMAPE).}\label{tab:gammafull}
+\resizebox{\textwidth}{!}{\begin{tabular}{cccccc}\toprule
+$\gamma$ & $t{+}20$ & $t{+}60$ & $t{+}120$ & $t{+}250$ & Overall MAE \\
+\midrule
+0.0 & 69.74/18.66\% & 76.37/21.77\% & 73.94/22.84\% & 71.37/23.21\% & 72.85 \\
+0.5 & 75.16/19.79\% & 78.42/23.03\% & 71.88/23.31\% & 63.94/23.49\% & 72.35 \\
+1.0 & 51.28/13.03\% & 64.83/19.53\% & 67.71/21.06\% & 72.03/23.40\% & 63.96 \\
+1.5 & 49.45/12.31\% & 72.24/20.76\% & 72.97/22.47\% & 71.21/22.31\% & 66.47 \\
+2.0 & 51.05/12.03\% & 62.63/18.40\% & 65.05/21.16\% & 62.45/22.25\% & 60.30 \\
+2.5 & 44.76/12.30\% & 59.10/19.88\% & 56.84/21.42\% & 60.30/21.93\% & 55.25 \\
+3.0 & 31.16/9.87\% & 38.24/15.98\% & 42.69/18.23\% & 57.63/18.55\% & 42.43 \\
+3.5 & 45.02/10.98\% & 50.74/18.27\% & 50.83/20.11\% & 47.92/18.77\% & 48.63 \\
+4.0 & 25.63/8.69\% & 34.80/14.76\% & 44.76/18.02\% & 68.01/19.23\% & 43.30 \\
+4.5 & 26.51/8.79\% & 33.81/14.64\% & 45.75/17.98\% & 52.97/18.29\% & 39.76 \\
+5.0 & 29.11/9.16\% & 36.16/15.02\% & 43.96/18.77\% & 63.66/21.33\% & 43.22 \\
+5.5 & 27.30/9.20\% & 36.53/15.15\% & 44.09/18.11\% & 60.35/18.96\% & 42.07 \\
+6.0 & 29.82/9.58\% & 41.54/16.12\% & 45.99/18.71\% & 52.75/18.48\% & 42.52 \\
+6.5 & 22.80/8.82\% & 33.87/15.01\% & 47.18/18.43\% & 70.78/19.82\% & 43.66 \\
+7.0 & 27.14/9.19\% & 35.76/15.19\% & 46.24/18.53\% & 67.92/19.85\% & 44.27 \\
+7.5 & 24.04/8.88\% & 34.79/14.91\% & 44.70/18.10\% & 66.88/19.48\% & 42.60 \\
+8.0 & 26.15/9.98\% & 37.37/16.02\% & 46.57/18.93\% & 67.36/19.76\% & 44.36 \\
+\bottomrule\end{tabular}}\end{table}
+\begin{figure}[htbp]\centering\includegraphics[width=.9\linewidth]{mae_vs_gamma.png}
+\caption{Horizon-specific and overall test MAE across the exponent grid.}\label{fig:gamma}\end{figure}
+
+\clearpage
+\section{Qualitative forecasts and model diagnostics}
+The first trajectory panel deliberately includes contrasting cases, while the
+second uses one median-representative product per group. These single origins
+are diagnostic examples, not substitutes for aggregate evaluation.
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{qualitative_predictions.png}
+\caption{Contrasting held-out trajectories from the earliest 2024 origin.}
+\label{fig:qual}
+\end{figure}
+\begin{figure}[htbp]\centering
+\includegraphics[width=\linewidth]{typical_qualitative_predictions.png}
+\caption{One median-representative held-out trajectory per commodity group.}
+\label{fig:typical}
+\end{figure}
+
+Attention and variable-selection weights describe this fitted network, not
+causal economic effects. The oldest encoder position receives the largest
+averaged attention weight; observed price dominates historical selection;
+group and product identifiers dominate the informative static covariates; and
+day of week dominates known-future selection. Encoder length is constant in
+this experiment, so its static-selection weight is an architectural artifact.
+\begin{figure}[htbp]\centering
+\includegraphics[width=.82\linewidth]{tft_attention_ablation.png}
+\caption{Averaged temporal attention over the 30-step encoder.}
+\label{fig:attn}
+\end{figure}
+\begin{figure}[htbp]\centering
+\includegraphics[width=.82\linewidth]{tft_static_vars_ablation.png}
+\caption{Static variable-selection weights.}
+\label{fig:static}
+\end{figure}
+\begin{figure}[htbp]\centering
+\includegraphics[width=.82\linewidth]{tft_encoder_vars_ablation.png}
+\caption{Historical encoder variable-selection weights.}
+\label{fig:encoder}
+\end{figure}
+\begin{figure}[htbp]\centering
+\includegraphics[width=.82\linewidth]{tft_decoder_vars_ablation.png}
+\caption{Known-future decoder variable-selection weights.}
+\label{fig:decoder}
+\end{figure}
+
+\clearpage
+\section{Target-normalizer level-shift diagnostic}
+For 401 products, define the raw-price proxy
+\[
+\operatorname{gap}_p=100\,
+\frac{y^{2023}_{p,\mathrm{last}}-\bar y^{2018:2022}_p}
+{\bar y^{2018:2022}_p}.
+\]
+This proxy is not the transformed internal normalizer center. Its absolute
+value exceeds 10\% for 283 products (70.6\%), with mean 30.4\%, median 18.4\%,
+and maximum 332\%. Absolute gap correlates with relative selected-model error
+at $t{+}20$ (Spearman $r=0.146$, unadjusted $p=0.007$), reverses sign at
+$t{+}120$ ($r=-0.206$, $p<0.001$) and $t{+}250$ ($r=-0.188$, $p<0.001$), and
+does not identify a causal normalizer effect. The per-product inputs are
+released in \texttt{normalizer\_staleness\_check.csv} and
+\texttt{gap\_vs\_performance.csv}.
+
 \section{ARIMA order}
 The local statistical reference uses $\text{ARIMA}(1,1,0)$, chosen a priori from the lag structure documented in Section~3.3 of the main paper (a unit root with a single partial-autocorrelation spike at lag one). We did not run a per-product order search for two reasons. First, Table~5 of the main paper shows the fitted $\text{ARIMA}(1,1,0)$ is already numerically indistinguishable from the persistence baseline at every horizon (differences of at most 0.01 THB), and the closed-form forecast function in Section~4.3 of the main paper explains why any low-order specification on a near-unit-root series must collapse onto that baseline. Second, the persistence baseline itself is retained as a separate reference, so the comparison against the strongest local statistical rule is already made directly.
 
 \section{Summary}
-Under an equal 10-configuration validation-based budget per class, Global LightGBM moves from 44.83 (published configuration, rerun) to 45.55 THB (+1.6\%); Global MLP moves from 51.38 (published configuration, rerun) to 48.02 THB (-6.5\%); Global LSTM moves from 54.58 (published configuration, rerun) to 54.61 THB (+0.1\%); Global Transformer moves from 52.88 (published configuration, rerun) to 57.27 THB (+8.3\%). No validation-selected reference configuration approaches the selected TFT of the main paper (39.76 THB overall), and none outperforms the matched persistence baseline overall. The conclusions of the main paper are therefore insensitive to reference-model tuning at this budget, and the configurations reported in Table~5 give each reference class a representative rather than handicapped operating point.
+Under a matched 10-configuration validation-based architecture-search budget per class, Global LightGBM moves from 44.83 (original configuration, rerun) to 45.55 THB (+1.6\%); Global MLP moves from 51.38 (original configuration, rerun) to 48.02 THB (-6.5\%); Global LSTM moves from 54.58 (original configuration, rerun) to 54.61 THB (+0.1\%); Global Transformer moves from 52.88 (original configuration, rerun) to 57.27 THB (+8.3\%). No validation-selected reference configuration approaches the selected TFT of the main paper (39.76 THB overall), and none outperforms the matched persistence baseline overall. The conclusions of the main paper are therefore insensitive to reference-model tuning at this architecture-search budget, and the configurations reported in Table~5 give each reference class a representative rather than handicapped operating point.
 \end{document}

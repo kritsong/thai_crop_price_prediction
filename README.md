@@ -7,7 +7,8 @@ Price Forecasting."*
 The paper asks why pooled deep models routinely lose to a naive
 last-observed-price rule on low signal-to-noise agricultural price series, and
 introduces a **Horizon-Weighted Quantile Loss**, `w(h) = 1/h^gamma`, that
-resolves the multi-scale gradient conflict responsible. Evaluation covers 404
+explicitly reallocates a uniform decoder-step objective across horizons. The
+paper does not claim to measure gradient-vector conflict directly. Evaluation covers 404
 Thai crop products from 2018 to 2025 under a matched-window protocol, against
 persistence, seasonal-naive, drift, ARIMA, LightGBM, MLP, LSTM, Transformer and
 a zero-shot time-series foundation model.
@@ -61,7 +62,7 @@ published tables and sweep figure remain auditable without those large files.
 | 5 | reference suite | `python -m src.models.train`, then `python run_extra_baselines.py` and `python run_chronos_zeroshot.py` |
 | 6 | decay-exponent sweep | `python run_gamma_sweep.py` |
 | 7 | selected model vs baseline, with significance tests | `python -m src.models.train_tft --gamma 4.5`, then `python build_publication_metrics.py` |
-| 8, 9 | temporal stability, calibrated intervals | `python build_publication_metrics.py` |
+| 8, 9 | temporal stability, empirically scaled intervals | `python build_publication_metrics.py` |
 
 ### Figures
 
