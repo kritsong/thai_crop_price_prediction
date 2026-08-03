@@ -71,13 +71,13 @@ tex.append(r"""\documentclass[11pt]{article}
 \graphicspath{{images/}}
 \usepackage[hidelinks]{hyperref}
 \setlength{\emergencystretch}{2em}
-\hypersetup{pdftitle={Supplementary Material: Horizon-Weighted Temporal Fusion Transformers for Thai Agricultural Commodity Price Forecasting},pdfauthor={Kritaphat Songsri-in, Auyporn Chukeaw, Munlika Rattaphun, Walaiporn Sornkliang, Rattayagon Thaiphan}}
+\hypersetup{pdftitle={Supplementary Material: Horizon-Weighted Temporal Fusion Transformers for Thai Agricultural Commodity Price Forecasting},pdfauthor={Walaiporn Sornkliang, Auyporn Chukeaw, Munlika Rattaphun, Rattayagon Thaiphan, Kritaphat Songsri-in}}
 \renewcommand{\thetable}{S\arabic{table}}
 \renewcommand{\thefigure}{S\arabic{figure}}
 \renewcommand{\thesection}{S\arabic{section}}
 \title{Supplementary Material for ``Beyond the Random Walk: Horizon-Weighted Temporal Fusion Transformers for Thai Agricultural Commodity Price Forecasting''}
-\author{Kritaphat Songsri-in, Auyporn Chukeaw, Munlika Rattaphun,\\
-Walaiporn Sornkliang, and Rattayagon Thaiphan}
+\author{Walaiporn Sornkliang, Auyporn Chukeaw, Munlika Rattaphun,\\
+Rattayagon Thaiphan, and Kritaphat Songsri-in}
 \date{}
 \begin{document}
 \maketitle

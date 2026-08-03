@@ -301,17 +301,17 @@ tex.append(r"\graphicspath{{images/}}")
 tex.append(r"\usepackage{array}")
 tex.append(r"\setlength{\emergencystretch}{2em}")
 tex.append(r"\journal{Knowledge-Based Systems}")
-tex.append(r"\hypersetup{pdftitle={Beyond the Random Walk: Horizon-Weighted Temporal Fusion Transformers for Thai Agricultural Commodity Price Forecasting},pdfauthor={Kritaphat Songsri-in, Auyporn Chukeaw, Munlika Rattaphun, Walaiporn Sornkliang, Rattayagon Thaiphan}}")
+tex.append(r"\hypersetup{pdftitle={Beyond the Random Walk: Horizon-Weighted Temporal Fusion Transformers for Thai Agricultural Commodity Price Forecasting},pdfauthor={Walaiporn Sornkliang, Auyporn Chukeaw, Munlika Rattaphun, Rattayagon Thaiphan, Kritaphat Songsri-in}}")
 tex.append(r"\begin{document}")
 tex.append(r"\begin{frontmatter}")
 tex.append(r"\title{%s}" % esc_plain(title))
 # Author names and affiliation follow the manuscript. The corresponding-author
 # address and email are consistent with the author's recent publications.
-tex.append(r"\author[a]{Kritaphat Songsri-in\corref{cor1}}")
+tex.append(r"\author[a]{Walaiporn Sornkliang}")
 tex.append(r"\author[a]{Auyporn Chukeaw}")
 tex.append(r"\author[a]{Munlika Rattaphun}")
-tex.append(r"\author[a]{Walaiporn Sornkliang}")
 tex.append(r"\author[a]{Rattayagon Thaiphan}")
+tex.append(r"\author[a]{Kritaphat Songsri-in\corref{cor1}}")
 tex.append(r"\affiliation[a]{organization={Department of Computer Science, Faculty of Science and Technology, "
            r"Nakhon Si Thammarat Rajabhat University}, addressline={1 Moo 4, Tha Ngio}, "
            r"city={Mueang Nakhon Si Thammarat}, postcode={80280}, state={Nakhon Si Thammarat}, country={Thailand}}")

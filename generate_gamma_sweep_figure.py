@@ -53,8 +53,8 @@ def main():
     best = float(overall.loc[SELECTED])
     ax.annotate(f"Selected model\ngamma = {SELECTED}, {best:.2f} THB",
                 xy=(SELECTED, best), xytext=(SELECTED + 0.55, best + 9),
-                fontsize=8.5,
-                arrowprops=dict(arrowstyle="->", color="#444444", linewidth=0.9))
+                fontsize=8.5, color="#c00000",
+                arrowprops=dict(arrowstyle="->", color="#c00000", linewidth=1.3))
 
     ax.set_xlabel(r"Decay exponent $\gamma$")
     ax.set_ylabel("Test MAE (THB)")

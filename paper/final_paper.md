@@ -1,6 +1,6 @@
 # Beyond the Random Walk: Horizon-Weighted Temporal Fusion Transformers for Thai Agricultural Commodity Price Forecasting
 
-**Authors:** Kritaphat Songsri-in$^{a,\ast}$, Auyporn Chukeaw$^{a}$, Munlika Rattaphun$^{a}$, Walaiporn Sornkliang$^{a}$, Rattayagon Thaiphan$^{a}$
+**Authors:** Walaiporn Sornkliang$^{a}$, Auyporn Chukeaw$^{a}$, Munlika Rattaphun$^{a}$, Rattayagon Thaiphan$^{a}$, Kritaphat Songsri-in$^{a,\ast}$
 $^{a}$Department of Computer Science, Faculty of Science and Technology, Nakhon Si Thammarat Rajabhat University, 1 Moo 4, Tha Ngio, Mueang Nakhon Si Thammarat, Nakhon Si Thammarat 80280, Thailand
 $^{\ast}$Corresponding author. *E-mail address:* kritaphat_son@nstru.ac.th
 
@@ -561,7 +561,7 @@ Several limitations qualify these results and motivate future work:
 
 ## CRediT authorship contribution statement
 
-**Kritaphat Songsri-in:** Conceptualization, Methodology, Software, Formal analysis, Writing – original draft. **Auyporn Chukeaw:** Data curation, Validation, Writing – review & editing. **Munlika Rattaphun:** Investigation, Validation, Writing – review & editing. **Walaiporn Sornkliang:** Data curation, Investigation, Writing – review & editing. **Rattayagon Thaiphan:** Supervision, Funding acquisition, Writing – review & editing.
+**Walaiporn Sornkliang:** Data curation, Investigation, Writing – review & editing. **Auyporn Chukeaw:** Data curation, Validation, Writing – review & editing. **Munlika Rattaphun:** Investigation, Validation, Writing – review & editing. **Rattayagon Thaiphan:** Supervision, Funding acquisition, Writing – review & editing. **Kritaphat Songsri-in:** Conceptualization, Methodology, Software, Formal analysis, Writing – original draft.
 
 ## Declaration of competing interest
 
