@@ -53,6 +53,17 @@ paper/images/tft_static_vars_5percent.png
 NOTES_INTERNAL.md
 PROJECT.md
 
+# ---- Exploratory work not reported in the paper ----
+# Combination variants were dropped from the manuscript, so the code and the
+# result files behind them are no longer published. Superseded sweep and
+# summary artefacts are kept locally only.
+ensemble_blend.py
+results/ensemble_blend_metrics.csv
+results/champion_gamma45_seed_ensemble_metrics.csv
+results/exhaustive_metrics_with_da.csv
+results/gamma_sweep_summary_213.csv
+results/eda_report.md
+
 # ---- Manuscript and submission material ----
 # This repository publishes the code and results only. The manuscript, the
 # cover letter and the submission paperwork stay local.
