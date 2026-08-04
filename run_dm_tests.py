@@ -1,16 +1,13 @@
-"""Diebold-Mariano-type significance tests for the selected model vs the
-matched Lag-1 baseline, computed from the saved per-window test predictions.
+"""Significance tests, selected model against the Lag-1 baseline.
 
-Method. The classical time-series DM test is degenerate here because h-step
-forecasts from consecutive origins overlap. At h = 250 the 273 windows contain
-roughly one effective independent observation, so no HAC correction can rescue
-a time-wise test. We therefore cluster by product: for each of the 404 crops
-we collapse its windows to one mean absolute-error differential
-d_p = mean(|e_model|) - mean(|e_baseline|), then test the cross-section of
-d_p values (negative = model better). Cross-product dependence is weak in this
-data (mean pairwise return correlation 0.012, Section 3.6 of the paper), so
-the product-level cross-section is close to independent. We report a two-sided
-t-test and a Wilcoxon signed-rank test per horizon and overall.
+A plain Diebold-Mariano test does not work here. Forecasts from consecutive
+origins overlap, and at h=250 the 273 windows per product are worth about one
+independent observation, which no HAC correction fixes. So we cluster by
+product instead: collapse each crop to one mean error differential, then test
+those 404 numbers. Negative means our model wins. Returns are close to
+uncorrelated across products, so treating them as independent is reasonable.
+
+Reports a t-test and a Wilcoxon per horizon.
 """
 import sys, io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")

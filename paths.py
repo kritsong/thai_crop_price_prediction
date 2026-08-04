@@ -1,17 +1,11 @@
-"""Central path configuration for the whole project.
+"""Where everything lives.
 
-Every script resolves its inputs and outputs through this module so that the
-repository runs unchanged on any machine. Resolution order for the two
-directories that live outside version control:
+The raw data and the checkpoints sit outside the repo, so we look for them in
+three places, in order: an env var if you set one, a folder inside the repo, or
+a folder next to it (which is how it is laid out on the machine we developed on).
 
-  1. an explicit environment variable, if set;
-  2. a repository-local directory, the layout a fresh clone gets;
-  3. a sibling directory next to the repository, the original working layout.
-
-Environment variables
----------------------
-CROP_DATA_DIR         directory holding the raw ``*.json`` price files
-CROP_EXPERIMENTS_DIR  directory holding checkpoints and per-run prediction files
+Set CROP_DATA_DIR and CROP_EXPERIMENTS_DIR if yours are somewhere else.
+Run this file directly to see what it picked up.
 """
 import os
 from pathlib import Path

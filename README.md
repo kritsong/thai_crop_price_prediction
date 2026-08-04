@@ -1,21 +1,19 @@
-# Horizon-Weighted Temporal Fusion Transformers for Thai Agricultural Commodity Price Forecasting
+# Thai crop price forecasting with a horizon-weighted TFT
 
-Code and reproduction scripts for the paper *"Beyond the Random Walk:
-Horizon-Weighted Temporal Fusion Transformers for Thai Agricultural Commodity
-Price Forecasting."*
+Code for our paper on forecasting Thai agricultural commodity prices with a
+Temporal Fusion Transformer.
 
-The paper asks why pooled deep models routinely lose to a naive
-last-observed-price rule on low signal-to-noise agricultural price series, and
-introduces a **Horizon-Weighted Quantile Loss**, `w(h) = 1/h^gamma`, that
-explicitly reallocates a uniform decoder-step objective across horizons. The
-paper does not claim to measure gradient-vector conflict directly. Evaluation covers 404
-Thai crop products from 2018 to 2025 under a matched-window protocol, against
-persistence, seasonal-naive, drift, ARIMA, LightGBM, MLP, LSTM, Transformer and
-a zero-shot time-series foundation model.
+The starting point was a frustrating result: on these price series, pooled deep
+models kept losing to the naive "tomorrow's price is today's price" rule. Our fix
+is a horizon-weighted quantile loss, `w(h) = 1/h^gamma`, which stops the
+long-horizon steps from dominating training. We sweep gamma from 0 to 8 and pick
+the operating point on a held-out validation year.
 
----
+Data is 404 crop products, 2018 to 2025, from the Ministry of Commerce. We
+compare against persistence, seasonal-naive, drift, ARIMA, LightGBM, MLP, LSTM,
+a plain Transformer, and a zero-shot foundation model.
 
-## 1. Setup
+## Setup
 
 ```bash
 python -m venv .venv && . .venv/bin/activate      # Windows: .venv\Scripts\activate
@@ -23,127 +21,90 @@ pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cu121
 pip install -r requirements.txt
 ```
 
-A CUDA GPU is needed to retrain the TFT or to run the foundation-model baseline.
-Every analysis step below runs on CPU from saved artefacts.
+You need a GPU to retrain the TFT or run the Chronos baseline. Everything else
+runs fine on CPU from the saved result files.
 
-### Where the data and artefacts live
+### Data and checkpoint locations
 
-`paths.py` resolves the two directories that sit outside version control, in
-this order: an environment variable, then a repository-local directory, then a
-sibling directory beside the repository.
+The raw price files and the model checkpoints are not in this repo. `paths.py`
+looks for them in this order: an environment variable, a folder inside the repo,
+then a folder next to it.
 
-| Variable | Contents | Repository-local default |
+| Variable | What it holds | Default |
 | :--- | :--- | :--- |
-| `CROP_DATA_DIR` | raw `*.json` price files, one per product | `./data/historical_data_2018` |
-| `CROP_EXPERIMENTS_DIR` | checkpoints and saved per-window predictions | `./experiments_results` |
+| `CROP_DATA_DIR` | the raw `*.json` price files | `./data/historical_data_2018` |
+| `CROP_EXPERIMENTS_DIR` | checkpoints and saved predictions | `./experiments_results` |
+
+Run `python paths.py` to see what it resolved and whether those folders exist.
+
+The raw data comes from the MOC Open Data portal ("Agricultural Product Price").
+We do not mirror it here, so download it yourself and point `CROP_DATA_DIR` at it.
+
+## Running things
+
+Experiments:
 
 ```bash
-python paths.py          # prints the resolved paths and whether they exist
+python run_eda.py                 # dataset stats and the EDA figures
+python -m src.models.train        # the reference models
+python run_extra_baselines.py     # seasonal-naive and drift
+python run_chronos_zeroshot.py    # zero-shot foundation model (needs GPU)
+python run_gamma_sweep.py         # the gamma sweep
+python run_reference_search.py    # hyperparameter search for the references
+python run_dm_tests.py            # significance tests
 ```
 
-Large artefacts are excluded from git. Rebuilding the selected-model tables and
-figures without retraining requires its checkpoint
-(`tft_hw_quantile_gamma_4_5.ckpt`, 1.1 MB) and saved per-window predictions
-(`tft_hw_quantile_gamma_4_5_predictions.npz`, 9.7 MB). Rebuilding the complete
-17-point sweep additionally requires the corresponding per-gamma metric and
-prediction files. Version-controlled aggregate CSV files are provided so the
-published tables and sweep figure remain auditable without those large files.
-
----
-
-## 2. Reproducing the paper
-
-### Tables
-
-| Table | Content | Command |
-| :--- | :--- | :--- |
-| 1, 2 | product inventory, stationarity | `python run_eda.py` |
-| 3, 4 | data partition, model configuration | descriptive, no script |
-| 5 | reference suite | `python -m src.models.train`, then `python run_extra_baselines.py` and `python run_chronos_zeroshot.py` |
-| 6 | decay-exponent sweep | `python run_gamma_sweep.py` |
-| 7 | selected model vs baseline, with significance tests | `python -m src.models.train_tft --gamma 4.5`, then `python build_publication_metrics.py` |
-| 8, 9 | temporal stability, empirically scaled intervals | `python build_publication_metrics.py` |
-
-### Figures
-
-| Figure | Content | Command |
-| :--- | :--- | :--- |
-| 1-4 | ACF/PACF, price trends, stationarity, correlation | `python run_eda.py` |
-| 5 | loss weighting decay curves | `python generate_loss_curve_figure.py` |
-| 6 | MAE against decay exponent | `python generate_gamma_sweep_figure.py` |
-| 7 | qualitative forecasts, deliberately extreme cases | `python generate_qualitative_figure.py` |
-| 8 | qualitative forecasts, one group-median case per commodity group | `python generate_typical_qualitative_figure.py` |
-| 9-12 | attention and variable selection | `python generate_interpretability_figures.py` |
-
-### Supplementary material
+Training the main model:
 
 ```bash
-python run_reference_search.py     # equal-budget hyperparameter search for every reference class
-python build_supplement.py         # writes paper/supplementary.tex
+python -m src.models.train_tft --gamma 4.5
+python build_publication_metrics.py
 ```
 
-### Building the documents
+Figures:
 
 ```bash
-python build_latex.py        && (cd paper && pdflatex main.tex && pdflatex main.tex)
-python build_supplement.py   && (cd paper && pdflatex supplementary.tex)
-python build_cover_letter.py && (cd paper && pdflatex cover_letter.tex)
+python generate_loss_curve_figure.py
+python generate_gamma_sweep_figure.py
+python generate_qualitative_figure.py
+python generate_typical_qualitative_figure.py
+python generate_interpretability_figures.py
 ```
 
-### Verification
+Tests:
 
 ```bash
-python verify_experiments.py   # 88 unit and end-to-end tests over the pipeline
-python verify_keywords.py      # manuscript integrity: figure paths and embedded-image count
-python verify_publication.py   # journal limits, placeholders, artifacts and PDFs
+python verify_experiments.py
 ```
 
-After all automated checks pass, complete the author-only confirmations in
-`SUBMISSION_CHECKLIST.md`. Those declarations require the authors' direct
-approval and cannot be inferred from the repository.
-
----
-
-## 3. Repository layout
+## Layout
 
 ```
-paths.py                       central path resolution, used by every script
-src/data/                      loading, cleaning, business-day alignment
-src/features/generator.py      leakage-safe feature construction
-src/models/loss.py             HorizonWeightedQuantileLoss
-src/models/train_tft.py        TFT training, evaluation, interval calibration
-src/models/train.py            reference models (ARIMA, LightGBM, MLP, LSTM, GRU, Transformer)
-results/                       aggregated metrics consumed by the manuscript
-paper/                         manuscript source, figures and built PDFs
+paths.py                    where everything lives
+src/data/                   loading, cleaning, business-day alignment
+src/features/generator.py   feature construction
+src/models/loss.py          the horizon-weighted loss
+src/models/train_tft.py     TFT training and evaluation
+src/models/train.py         reference models
+results/                    the numbers behind the paper's tables
 ```
 
-Two implementation details worth knowing before modifying anything:
+Two things that will bite you if you change the code:
 
-- **`HorizonWeightedQuantileLoss` subclasses `QuantileLoss`, not
-  `MultiHorizonMetric`.** `pytorch_forecasting` deduces `output_size` from an
-  `isinstance` check against `QuantileLoss`. Subclassing the wrong base silently
-  produces `output_size=1` and the model fails at runtime.
-- **The target normaliser is fitted once on the training window and never
-  refreshed.** This is a real limitation, quantified rather than hidden, in
-  Section 4.8 of the paper.
+`HorizonWeightedQuantileLoss` subclasses `QuantileLoss`, not `MultiHorizonMetric`.
+`pytorch_forecasting` uses an `isinstance` check to work out `output_size`, so
+picking the wrong base class silently gives you `output_size=1` and a crash later.
 
----
+The target normaliser is fitted once on the training window and never refreshed.
+That is a real weakness and we discuss it in the paper rather than paper over it.
 
-## 4. Data provenance and licence
+## Data licence
 
-Raw prices come from the Ministry of Commerce (Thailand), Department of Internal
-Trade, via the MOC Open Data portal, "Agricultural Product Price" dataset.
-Check the portal's own terms before redistributing the raw files; if the terms
-are unclear, run the pipeline against a fresh download rather than a mirrored
-copy.
+Prices are from the Ministry of Commerce (Thailand), Department of Internal
+Trade. Check their terms before redistributing the raw files. The code here is
+MIT licensed (see `LICENSE`); the price data is not ours and is not covered by it.
 
-The code here is released under the licence in `LICENSE`. The underlying price
-data remains the property of its original publisher and is not covered by that
-licence.
+## Contact
 
----
-
-## 5. Citation
-
-Citation details will be added on publication. Until then, contact Kritaphat
-Songsri-in at `kritaphat_son@nstru.ac.th`.
+Kritaphat Songsri-in, `kritaphat_son@nstru.ac.th`. Citation details will follow
+once the paper is out.

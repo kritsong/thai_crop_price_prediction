@@ -1,12 +1,11 @@
-"""Zero-shot Chronos-Bolt-Base evaluation on the exact matched test windows of
-Table 5. For every test window the model receives the product's full price
-history up to the origin (truncated to the pipeline's context limit) and must
-produce quantile forecasts 250 steps ahead; the median at steps 20, 60, 120,
-and 250 is scored with MAE/SMAPE against the same actuals as every other row
-of Table 5. No fine-tuning of any kind.
+"""Chronos-Bolt-Base, zero-shot, on the same test windows as everything else.
 
-Sanity contract: persistence recomputed on the assembled windows must
-reproduce the published values exactly.
+Each window gets the product's price history up to the origin (capped at the
+model's context limit) and has to predict 250 steps out. We score the median at
+20, 60, 120 and 250 against the same actuals as every other model. No
+fine-tuning, that is the whole point of including it.
+
+Persistence is recomputed here as a check that the windows line up.
 """
 import os, sys, io, json, glob, time
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")

@@ -1,13 +1,11 @@
-"""Regenerate the qualitative forecast figure from the REAL champion model
-(gamma=4.5, seed 42 checkpoint) rather than a heuristic curve-fitting stand-in.
+"""Qualitative forecast figure, four products, from the gamma=4.5 checkpoint.
 
-Loads the trained network, runs a real forward pass for the earliest 2024
-origin of four hand-picked products, and plots the genuine quantile forecast
-against the held-out actuals. Product selection criteria (see README/paper
-Section 5.4): two products kept from the original figure for continuity, plus
-one dramatic instance of the paper's modal pattern (loses near-term, wins big
-long-term) and one genuine long-horizon loss case, so the figure is not
-cherry-picked toward flattering examples only.
+Loads the trained network and runs a forward pass from the earliest 2024
+origin, then plots the quantile forecast against what actually happened.
+
+Two of the four products are carried over from earlier drafts. The other two
+were picked on purpose to keep this honest: one where we win big at long
+horizon, and one where we lose even at a year out.
 """
 import sys
 import warnings

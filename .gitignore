@@ -53,6 +53,20 @@ paper/images/tft_static_vars_5percent.png
 NOTES_INTERNAL.md
 PROJECT.md
 
+# ---- Manuscript and submission material ----
+# This repository publishes the code and results only. The manuscript, the
+# cover letter and the submission paperwork stay local.
+SUBMISSION_CHECKLIST.md
+paper/*.md
+paper/*.tex
+paper/*.pdf
+paper/*.txt
+build_latex.py
+build_supplement.py
+build_cover_letter.py
+verify_publication.py
+verify_keywords.py
+
 # ---- Local scratch ----
 .pdf_qa/
 *.tmp

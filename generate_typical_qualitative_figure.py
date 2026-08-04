@@ -1,18 +1,13 @@
-"""Second qualitative figure: one product per commodity group, each selected as
-the group's TYPICAL case rather than an extreme, complementing Figure 7's
-deliberately extreme examples (largest win, a genuine loss).
+"""The second qualitative figure, one product per commodity group.
 
-Selection rule (pre-specified, computed in a separate analysis pass from
-results/gap_vs_performance.csv, not from this script): for every commodity
-group with a computed normalizer-gap record, take each product's full-period
-aggregate relative MAE change (selected model vs matched Lag-1 baseline,
-averaged over t+20/60/120/250), find the group's own median of that quantity,
-and pick the product whose value is closest to it. This yields nine products,
-one per group, each representative of what the model typically does in that
-group rather than its best or worst outcome.
+The first figure uses extremes (our biggest win, and a case we lose), which is
+honest but says nothing about the typical case. So here we show the median one
+instead. For each group we take every product's average relative MAE change
+against the baseline, find the group median, and plot whichever product sits
+closest to it. Nine groups, nine panels.
 
-Real inference only, via the same checkpoint-loading pattern proven in
-generate_qualitative_figure.py: no curve-fitting stand-ins.
+The picks were computed separately from gap_vs_performance.csv, not chosen by
+eye. Forecasts are real inference from the checkpoint.
 """
 import sys
 import warnings

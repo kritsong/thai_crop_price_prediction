@@ -1,16 +1,13 @@
-"""Seasonal-naive and drift baselines on the exact matched test windows of
-Table 5. Both are parameter-free classical rules that are strong at long
-horizons, exactly the opponents a skeptical reviewer would demand.
+"""Seasonal-naive and drift baselines, on the same test windows as everything else.
 
-Seasonal naive with a 250-business-day period, from origin o for horizon h:
-forecast = y[o + h - 250] (the price at the same point one year earlier,
-always observable at the origin since h <= 250).
-Drift method: forecast = y[o] + h * (y[o] - y[0]) / o, the straight line
-through the first and last observations of the history up to the origin.
+Both are parameter-free and both are decent at long horizons, which is exactly
+where we claim an advantage, so they are the honest ones to beat.
 
-Sanity contract: the persistence numbers recomputed here must reproduce the
-published matched-window values (15.11 / 30.86 / 51.03 / 83.84, overall 45.21)
-exactly, proving the windows are identical to Table 5.
+Seasonal naive uses a 250-business-day period, i.e. the price one year earlier.
+Drift extrapolates the line through the first and last observed points.
+
+The script also recomputes persistence and asserts it matches the published
+numbers, which is a cheap way to prove the windows really are identical.
 """
 import os, sys, io, json, glob
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")

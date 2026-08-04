@@ -1,20 +1,15 @@
-"""Fair, validation-based hyperparameter search for the learned global reference
-models (LightGBM, MLP, LSTM, Transformer) reported in Table 5.
+"""Hyperparameter search for the reference models (LightGBM, MLP, LSTM, Transformer).
 
-Protocol (mirrors Section 4.2 of the paper):
-  * Search phase: each candidate configuration is fitted on labels within
-    2018-2022 only and scored by matched-window MAE on validation windows whose
-    horizon-h label falls inside 2023, averaged over h in {20, 60, 120, 250}.
-  * Final phase: the validation-selected configuration (and, for reference, the
-    published configuration) is refitted on labels through 2023, the same
-    training window the published reference models used, and evaluated on the
-    identical 2024-2025 matched test windows as Table 5.
-  * Equal light budget: 10 candidate configurations per model class, matching
-    the 10-trial budget of the TFT architecture search (src/models/tune_tft.py).
-    The published configuration is always one of the 10 candidates.
+The point is to answer the obvious reviewer question, whether we tuned our own
+model carefully and left the baselines at defaults. Each class gets 10 candidate
+configs, the same budget as our own architecture search, and the config we
+already use is always one of the 10.
 
-Outputs results/reference_hparam_search.csv (per-configuration validation MAE)
-and results/reference_hparam_final.csv (test MAE of selected vs published).
+Candidates are fitted on 2018-2022 and scored on 2023 validation windows. The
+winner is then refitted through 2023 and evaluated on the same 2024-2025 test
+windows as everything else.
+
+Writes reference_hparam_search.csv and reference_hparam_final.csv.
 """
 import os
 import sys, io, json, glob, time
