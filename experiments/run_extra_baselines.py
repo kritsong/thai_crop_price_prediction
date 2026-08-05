@@ -15,6 +15,10 @@ import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
 
+# make the repository root importable regardless of how this is invoked
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))
 from src.data.loader import CropDataLoader, EmptySeriesError
 from src.features.generator import FeatureGenerator
 

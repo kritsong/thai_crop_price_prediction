@@ -15,6 +15,10 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
+# make the repository root importable regardless of how this is invoked
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))
 from paths import CHAMPION_NPZ, RESULTS_DIR
 
 NPZ = str(CHAMPION_NPZ)

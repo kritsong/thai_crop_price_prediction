@@ -21,6 +21,10 @@ import matplotlib.dates as mdates
 
 from pytorch_forecasting import TimeSeriesDataSet, TemporalFusionTransformer
 from pytorch_forecasting.data import GroupNormalizer
+# make the repository root importable regardless of how this is invoked
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))
 from src.models.loss import HorizonWeightedQuantileLoss
 from src.data.tft_loader import build_dataset
 

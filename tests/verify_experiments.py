@@ -20,6 +20,10 @@ import tempfile
 import threading
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from sklearn.metrics import mean_absolute_error, mean_squared_error
+# make the repository root importable regardless of how this is invoked
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))
 
 # Add workspace root to sys.path to ensure src can be imported
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))

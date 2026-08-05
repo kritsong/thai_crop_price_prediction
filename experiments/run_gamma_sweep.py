@@ -19,6 +19,10 @@ from pathlib import Path
 import pandas as pd
 
 PACKAGE_ROOT = Path(__file__).resolve().parent
+# make the repository root importable regardless of how this is invoked
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))
 from paths import EXPERIMENTS_DIR
 
 RESULTS_DIR = EXPERIMENTS_DIR
