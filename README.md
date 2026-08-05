@@ -37,8 +37,12 @@ then a folder next to it.
 
 Run `python paths.py` to see what it resolved and whether those folders exist.
 
-The raw data comes from the MOC Open Data portal ("Agricultural Product Price").
-We do not mirror it here, so download it yourself and point `CROP_DATA_DIR` at it.
+The raw price files are included under `data/historical_data_2018/`, so a fresh
+clone reproduces the analysis without downloading anything. They come from the
+MOC Open Data portal ("Agricultural Product Price") and are redistributed here
+for reproducibility only; the portal remains the authoritative source, and the
+data belongs to the Ministry of Commerce rather than to us. Set `CROP_DATA_DIR`
+if you would rather point at your own copy.
 
 ## Running things
 
@@ -105,8 +109,12 @@ That is a real weakness and we discuss it in the paper rather than paper over it
 ## Data licence
 
 Prices are from the Ministry of Commerce (Thailand), Department of Internal
-Trade. Check their terms before redistributing the raw files. The code here is
-MIT licensed (see `LICENSE`); the price data is not ours and is not covered by it.
+Trade, via the MOC Open Data portal. The copy under `data/` is included so this
+work can be reproduced, and is not offered under the repository's own licence.
+The code here is MIT licensed (see `LICENSE`); the price data is not ours, is not
+covered by that licence, and remains subject to whatever terms the Ministry
+applies. Check with the Ministry before reusing it for anything beyond
+reproducing this study, and treat the portal as the authoritative source.
 
 ## Contact
 
