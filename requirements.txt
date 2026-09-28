@@ -18,10 +18,18 @@ lightgbm==4.6.0
 joblib==1.5.2
 matplotlib==3.10.7
 
-# Only needed to reproduce the zero-shot foundation-model row of Table 5.
+# Only needed for the foundation-model references (Chronos-Bolt, Chronos-2,
+# TimesFM 2.5 and 3.0, zero-shot and fine-tuned). These were run with
+# torch 2.6.0 (CUDA 12.4) and the versions below.
 chronos-forecasting==2.3.0
+# TimesFM 2.5 uses timesfm 2.0.1. TimesFM 3.0 needs a timesfm 3.x release
+# (TimesFM3Forecaster), installed separately.
+timesfm==2.0.1
+transformers==5.1.0
+peft==0.19.1
+accelerate==1.13.0
 
-# Only needed to re-run the TFT architecture search of Supplementary Section S2.
+# Only needed to re-run the TFT architecture search (Supplementary Section S8).
 optuna==4.9.0
 optuna-integration==4.9.0
 pypdf==6.12.2

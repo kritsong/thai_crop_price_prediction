@@ -114,6 +114,15 @@ def main():
     print(f"chronos overall MAE: {rows['mae_overall']:.2f}")
 
     pd.DataFrame([rows]).to_csv(os.path.join(RESULTS_DIR, "chronos_zeroshot.csv"), index=False)
+
+    # per-window forecasts, so scale-aware and per-family metrics can be computed later
+    from paths import EXPERIMENTS_DIR
+    np.savez_compressed(
+        EXPERIMENTS_DIR / "chronos_zeroshot_predictions.npz",
+        product_id=np.array([w["pid"] for w in wins]), origin=np.array([w["origin"] for w in wins]),
+        persistence=np.array([w["persistence"] for w in wins]),
+        **{f"actual_h{h}": np.array([w["actuals"][h] for w in wins]) for h in H},
+        **{f"median_h{h}": preds[h] for h in H})
     print(f"saved results/chronos_zeroshot.csv  ({(time.time()-t0)/60:.1f} min total)")
 
 

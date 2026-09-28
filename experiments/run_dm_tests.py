@@ -61,5 +61,33 @@ rows.append({
 print(f"overall: mean d={overall.mean():+8.2f} THB  share better={100*(overall<0).mean():5.1f}%  "
       f"t={t:+7.2f} p={p_t:.2e}  wilcoxon p={p_w:.2e}")
 
-pd.DataFrame(rows).to_csv(OUT, index=False)
+def holm_adjust(p_values):
+    """Holm-Bonferroni step-down adjustment, applied across the four horizons."""
+    values = np.asarray(p_values, dtype=float)
+    order = np.argsort(values)
+    adjusted = np.empty_like(values)
+    running_max = 0.0
+    m = len(values)
+    for rank, idx in enumerate(order):
+        running_max = max(running_max, (m - rank) * values[idx])
+        adjusted[idx] = min(running_max, 1.0)
+    return adjusted
+
+
+out = pd.DataFrame(rows)
+
+# The paper reports the four horizon comparisons as a family, so the horizon
+# rows are corrected together. The overall row is a separate summary and is
+# left unadjusted.
+mask = out["horizon"].isin(H)
+for src, dst in [("p_ttest", "p_ttest_holm"), ("p_wilcoxon", "p_wilcoxon_holm")]:
+    out[dst] = np.nan
+    out.loc[mask, dst] = holm_adjust(out.loc[mask, src].to_numpy())
+
+print("\nHolm-adjusted across the four horizons:")
+for _, r in out[mask].iterrows():
+    print(f"  h={int(r.horizon):3d}  t-test {r.p_ttest:.2e} -> {r.p_ttest_holm:.2e}"
+          f"   wilcoxon {r.p_wilcoxon:.2e} -> {r.p_wilcoxon_holm:.2e}")
+
+out.to_csv(OUT, index=False)
 print("saved", OUT)
