@@ -6,7 +6,7 @@ rules, the learned reference suite, zero-shot Chronos-Bolt, both TFTs, and the
 two designs chosen by single-year validation, all on the identical matched
 test windows. Writes results/mr_*.csv and results/mr_parameters.json.
 
-  mr_main.csv            per-horizon MAE, RMSE, SMAPE, relative MAE, MAE without rice
+  mr_main.csv            per-horizon MAE, RMSE, MAPE, SMAPE, relative MAE, MAE without rice
   mr_reference_suite.csv every model in THB and scale-free terms
   mr_ablation.csv        structure x pooling, refitted through 2023 (interpretation only)
   mr_significance.csv    product-, family- and group-clustered tests with Holm correction
@@ -45,6 +45,12 @@ def holm(p):
 def smape(a, f):
     d = (np.abs(a) + np.abs(f)) / 2.0
     return float(np.mean(np.where(d == 0, 0.0, 100.0 * np.abs(f - a) / d)))
+
+
+def mape(a, f):
+    # cleaning casts zero prices to missing, so every actual price is positive
+    assert np.all(a > 0)
+    return float(np.mean(100.0 * np.abs(f - a) / a))
 
 
 def per_product(a, f, p, g):
@@ -145,16 +151,16 @@ def main():
         for h in H:
             w = W[h]; a, f, p = w["a"], w[m_], w["persistence"]; xr = ~rice[w["g"]]
             rec.update({f"MAE_{h}": float(np.mean(np.abs(a - f))), f"RMSE_{h}": float(np.sqrt(np.mean((a - f) ** 2))),
-                        f"SMAPE_{h}": smape(a, f), f"RelMAE_{h}": rel_mae(a, f, p, w["g"]),
+                        f"MAPE_{h}": mape(a, f), f"SMAPE_{h}": smape(a, f), f"RelMAE_{h}": rel_mae(a, f, p, w["g"]),
                         f"MAExr_{h}": float(np.mean(np.abs(a[xr] - f[xr]))),
                         f"RelMAExr_{h}": rel_mae(a[xr], f[xr], p[xr], w["g"][xr])})
-        for k in ["MAE", "RMSE", "SMAPE", "MAExr"]:
+        for k in ["MAE", "RMSE", "MAPE", "SMAPE", "MAExr"]:
             rec[f"{k}_overall"] = float(np.mean([rec[f"{k}_{h}"] for h in H]))
         for k in ["RelMAE", "RelMAExr"]:
             rec[f"{k}_overall"] = gmean([rec[f"{k}_{h}"] for h in H])
         main_rows.append(rec)
         suite.append({"model": m_, "source": "window", **{k: rec[k] for k in
-                      ["MAE_overall", "MAExr_overall", "RelMAE_overall", "RelMAExr_overall", "RMSE_overall", "SMAPE_overall"]},
+                      ["MAE_overall", "MAExr_overall", "RelMAE_overall", "RelMAExr_overall", "RMSE_overall", "MAPE_overall", "SMAPE_overall"]},
                       **{f"RelMAE_{h}": rec[f"RelMAE_{h}"] for h in H}})
     pd.DataFrame(main_rows).to_csv(RESULTS_DIR / "mr_main.csv", index=False)
 
