@@ -187,6 +187,7 @@ picks = [type("R", (), {"product_id": order[0]}), type("R", (), {"product_id": o
 
 # ---- Figure 2: indexed price trends of six largest groups ----
 top_groups = act.group.value_counts().head(6).index.tolist()
+trend_n, trend_end = {}, None
 fig, ax = plt.subplots(figsize=(10, 5))
 for g, c in zip(top_groups, OKABE):
     pids = act[act.group == g].product_id
@@ -197,16 +198,29 @@ for g, c in zip(top_groups, OKABE):
         if base and not np.isnan(base) and base > 0:
             idxed.append(s / base * 100)
     gi = pd.concat(idxed, axis=1).mean(axis=1).resample("ME").mean()
-    ax.plot(gi.index, gi.values, color=c, linewidth=2, label=f"{g} (n={len(pids)})")
+    # n is the number of series actually averaged (all active series of the group have 2018 prices)
+    ax.plot(gi.index, gi.values, color=c, linewidth=2, label=f"{g} (n={len(idxed)})")
     ax.annotate(g, (gi.index[-1], gi.values[-1]), xytext=(4, 0), textcoords="offset points",
                 color=c, fontsize=8, va="center")
+    trend_n[g] = len(idxed)
+    trend_end = max(trend_end, gi.index[-1]) if trend_end is not None else gi.index[-1]
 ax.set_ylabel("Mean indexed price (2018 = 100)")
 ax.set_title("Indexed price trajectories of the six largest product groups (monthly means)")
 ax.legend(fontsize=8, ncol=2, loc="upper left")
-ax.margins(x=0.12)
+# the data end in December 2025, so label each year at its middle and stop the labels at 2025
+import matplotlib.dates as mdates
+years = range(2018, trend_end.year + 1)
+ax.set_xticks([pd.Timestamp(f"{y}-01-01") for y in list(years) + [trend_end.year + 1]])
+ax.xaxis.set_major_formatter(plt.NullFormatter())
+ax.set_xticks([pd.Timestamp(f"{y}-07-01") for y in years], minor=True)
+ax.set_xticklabels([str(y) for y in years], minor=True)
+ax.tick_params(axis="x", which="minor", length=0)
+ax.set_xlim(pd.Timestamp("2018-01-01"), pd.Timestamp(f"{trend_end.year + 1}-12-31"))
+ax.set_xlabel("Year (January 2018 to December 2025)")
 fig.tight_layout()
 fig.savefig(os.path.join(IMG, "price_trend.png"), dpi=150)
 plt.close(fig)
+print(f"price_trend: {sum(trend_n.values())} active series in the six largest groups {trend_n}, last month {trend_end:%Y-%m}", flush=True)
 
 # ---- Figure 3: stationarity by group ----
 g3 = act.groupby("group").agg(n=("product_id", "count"), smin=("stat_min", "mean"),
@@ -270,6 +284,8 @@ EN = {
  "W18096": ("Palm fruit bunch 18%, Phang Nga", "Palm fruit"),
 }
 FAM_ORDER = ["Cassava", "Grain", "Rubber", "Vegetable", "Palm oil", "Palm fruit"]
+# "most liquid" = highest share of business days with a price change
+liquid = act.sort_values("move_rate", ascending=False)
 top40 = list(liquid.head(40).product_id)
 if set(top40) == set(EN):
     ordered = sorted(top40, key=lambda p: (FAM_ORDER.index(EN[p][1]), p))

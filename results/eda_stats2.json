@@ -1,0 +1,21 @@
+{
+ "top40_levels_mean": 0.574,
+ "top40_levels_share_above_05": 0.664,
+ "top40_levels_within_family": 0.94,
+ "top40_levels_cross_family": 0.481,
+ "top40_returns_mean": 0.106,
+ "top40_returns_within_family": 0.377,
+ "top40_returns_cross_family": 0.037,
+ "universe_levels_mean": 0.18,
+ "universe_levels_median": 0.176,
+ "universe_levels_share_above_05": 0.143,
+ "universe_levels_within_group": 0.357,
+ "universe_levels_cross_group": 0.152,
+ "universe_returns_mean": 0.012,
+ "universe_returns_median": 0.0,
+ "universe_returns_share_above_05": 0.01,
+ "universe_returns_within_group": 0.091,
+ "universe_returns_cross_group": -0.001,
+ "universe_n_products": 404,
+ "universe_n_pairs": 81406
+}

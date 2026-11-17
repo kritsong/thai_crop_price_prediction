@@ -1,0 +1,70 @@
+{
+ "n_files": 729,
+ "n_empty": 94,
+ "n_active": 635,
+ "zero_share_pct": 4.6,
+ "n_pass_1pct": 404,
+ "n_pass_5pct": 213,
+ "move_rate_median": 0.0245,
+ "stationary_min_pct_all": 30.9,
+ "stationary_max_pct_all": 28.8,
+ "table1": {
+  "active": {
+   "Aquatic & Marine": 39,
+   "Feed & Raw Materials": 11,
+   "Field Crops": 40,
+   "Food Crops": 82,
+   "Fresh Vegetables": 89,
+   "Fruits": 64,
+   "Meat & Poultry": 98,
+   "Miscellaneous / Unknown": 0,
+   "Oil Crops & Oils": 95,
+   "Organic Veg & Fruits": 44,
+   "Retail Rice": 9,
+   "Wholesale Rice & Bags": 54,
+   "Wholesale Rice to Retailers": 10
+  },
+  "empty": {
+   "Aquatic & Marine": 6,
+   "Feed & Raw Materials": 4,
+   "Field Crops": 4,
+   "Food Crops": 11,
+   "Fresh Vegetables": 0,
+   "Fruits": 8,
+   "Meat & Poultry": 14,
+   "Miscellaneous / Unknown": 5,
+   "Oil Crops & Oils": 41,
+   "Organic Veg & Fruits": 0,
+   "Retail Rice": 1,
+   "Wholesale Rice & Bags": 0,
+   "Wholesale Rice to Retailers": 0
+  },
+  "total": {
+   "Aquatic & Marine": 45,
+   "Feed & Raw Materials": 15,
+   "Field Crops": 44,
+   "Food Crops": 93,
+   "Fresh Vegetables": 89,
+   "Fruits": 72,
+   "Meat & Poultry": 112,
+   "Miscellaneous / Unknown": 5,
+   "Oil Crops & Oils": 136,
+   "Organic Veg & Fruits": 44,
+   "Retail Rice": 10,
+   "Wholesale Rice & Bags": 54,
+   "Wholesale Rice to Retailers": 10
+  }
+ },
+ "table2": {
+  "Retail": {
+   "n": 269,
+   "min_pct": 35.7,
+   "max_pct": 33.1
+  },
+  "Wholesale": {
+   "n": 366,
+   "min_pct": 27.3,
+   "max_pct": 25.7
+  }
+ }
+}
