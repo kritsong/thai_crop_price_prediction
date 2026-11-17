@@ -6,7 +6,7 @@ Multi-Horizon Thai Agricultural Commodity Price Forecasting".
 Daily prices of 404 Thai crop products (2018 to 2025, Ministry of Commerce)
 behave close to a random walk, and at horizons of one month to one year almost
 nothing beats the naive "the future price is today's price" forecast for the
-typical product. We benchmark 21 references against it, from ARIMA and LightGBM
+typical product. We benchmark 23 references against it, from ARIMA and LightGBM
 to a Temporal Fusion Transformer (TFT) and zero-shot and fine-tuned
 Chronos and TimesFM foundation models, and show that averaging errors in Thai
 baht hides this failure, because wholesale rice is 11% of the products but 73%
@@ -22,7 +22,7 @@ y_hat = y + a * (mu_short - y) + b * (mu_long - y),   a, b >= 0,  a + b <= 1
 
 with shares fitted per commodity group, horizon, and deviation state by least
 absolute deviations. The design is chosen by rolling-origin validation over
-2021 to 2023 and evaluated once on 2024 to 2025. The implementation is
+2021 to 2023 and tested on 2024 to 2025. The implementation is
 `src/models/mean_reversion.py`.
 
 ## Setup

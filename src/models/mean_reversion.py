@@ -21,12 +21,12 @@ GRID1 = np.round(np.linspace(0, 1, 101), 2)
 GRID2 = np.round(np.arange(0, 1 + 1e-9, 0.02), 2)
 
 
-def anchors(P):
-    """Trailing 750-day and expanding means of a (products x days) price matrix, known at each day."""
+def anchors(P, window=750):
+    """Trailing window-day and expanding means of a (products x days) price matrix, known at each day."""
     T = P.shape[1]
     C = np.concatenate([np.zeros((P.shape[0], 1)), np.cumsum(P, axis=1)], axis=1)
     idx = np.arange(T)
-    lo = np.maximum(idx + 1 - 750, 0)
+    lo = np.maximum(idx + 1 - window, 0)
     return (C[:, idx + 1] - C[:, lo]) / (idx + 1 - lo), C[:, 1:] / (idx + 1)
 
 
@@ -45,14 +45,19 @@ def _fit_cell(r, g1, g2, w, two):
 
 
 class MeanReversion:
-    """structure in {single, two, state, two_state}; objective in {thb, relative}."""
+    """structure in {single, two, state, two_state}; objective in {thb, relative}.
 
-    def __init__(self, P, level, cells, structure="two_state", objective="thb"):
+    window (trailing-mean length) and cut_q (deviation-state quantile) default to
+    the reported 750 days and the median, and exist for the sensitivity checks.
+    """
+
+    def __init__(self, P, level, cells, structure="two_state", objective="thb", window=750, cut_q=0.5):
         self.P, self.level, self.cells = P, level, cells
         self.structure, self.objective = structure, objective
         self.two = structure in ("two", "two_state")
         self.state = structure in ("state", "two_state")
-        self.m_short, self.m_long = anchors(P)
+        self.cut_q = cut_q
+        self.m_short, self.m_long = anchors(P, window)
         self.params = {}
 
     def _gap(self, g, o):
@@ -71,7 +76,7 @@ class MeanReversion:
         for c in np.unique(self.cells):
             k = np.flatnonzero(self.cells[g] == c)
             if self.state:
-                gs = self._gap(g[k], o[k]); cut = float(np.median(gs))
+                gs = self._gap(g[k], o[k]); cut = float(np.quantile(gs, self.cut_q))
                 for s, ks in (("small", gs <= cut), ("large", gs > cut)):
                     i = k[ks]
                     prm[(c, s)] = _fit_cell(r[i], g1[i], g2[i], w[i], self.two)
